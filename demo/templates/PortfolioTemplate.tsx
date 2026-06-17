@@ -151,30 +151,6 @@ const TESTIMONIALS = [
   },
 ];
 
-const POSTS = [
-  {
-    title: 'Building Scalable React Apps with Feature Flags',
-    excerpt: 'A deep dive into progressive feature rollouts using LaunchDarkly and custom React hooks—keeping your codebase clean while shipping faster.',
-    tags: ['React', 'Architecture'],
-    readTime: '8 min read',
-    date: 'Mar 18, 2026',
-  },
-  {
-    title: 'PostgreSQL Query Optimization: From 4s to 40ms',
-    excerpt: 'Real-world walkthrough of diagnosing slow queries with EXPLAIN ANALYZE, adding strategic indexes, and restructuring joins in a production database.',
-    tags: ['PostgreSQL', 'Performance'],
-    readTime: '12 min read',
-    date: 'Feb 27, 2026',
-  },
-  {
-    title: 'TypeScript Discriminated Unions in Practice',
-    excerpt: 'How I use discriminated unions to model complex domain state in a fintech app—eliminating entire classes of runtime errors at the type level.',
-    tags: ['TypeScript', 'Patterns'],
-    readTime: '6 min read',
-    date: 'Jan 14, 2026',
-  },
-];
-
 function StarRating({ count = 5 }: { count?: number }) {
   return (
     <span style={{ display: 'inline-flex', gap: 2 }}>
@@ -278,7 +254,7 @@ export function PortfolioTemplate({ theme }: Props) {
           </div>
           {!bp.isMobile && (
             <>
-              {(['About', 'Work', 'Skills', 'Blog'] as const).map(link => (
+              {(['About', 'Work', 'Skills'] as const).map(link => (
                 <TkxButton key={link} variant="ghost" size="sm">{link}</TkxButton>
               ))}
               <TkxButton variant="ghost" size="sm">Contact</TkxButton>
@@ -311,7 +287,7 @@ export function PortfolioTemplate({ theme }: Props) {
             zIndex: 99,
             boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           }}>
-            {(['About', 'Work', 'Skills', 'Blog', 'Contact'] as const).map(link => (
+            {(['About', 'Work', 'Skills', 'Contact'] as const).map(link => (
               <TkxButton key={link} variant="ghost" size="sm" onClick={() => setMobileNavOpen(false)}>{link}</TkxButton>
             ))}
             <TkxBadge variant="success" style={{ alignSelf: 'flex-start', marginTop: 4 }}>● Available for work</TkxBadge>
@@ -501,47 +477,6 @@ export function PortfolioTemplate({ theme }: Props) {
                     </div>
                   </div>
                 </TkxCardBody>
-              </TkxCard>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <TkxDivider />
-
-      {/* ─── BLOG ─── */}
-      <section style={{ padding: bp.isMobile ? '40px 0' : '72px 0' }}>
-        <div style={section()}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 40, flexWrap: 'wrap', gap: 16 }}>
-            <div>
-              <h2 style={{ ...sectionHeading(), marginBottom: 4 }}>Latest Writing</h2>
-              <p style={{ ...sectionSub(), marginBottom: 0 }}>Thoughts on engineering, architecture, and craft.</p>
-            </div>
-            <TkxButton variant="outline" size="sm">View All Posts →</TkxButton>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
-            {POSTS.map((post, i) => (
-              <TkxCard key={i} isHoverable style={{ display: 'flex', flexDirection: 'column' }}>
-                <TkxCardBody style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
-                    {post.tags.map(tag => (
-                      <TkxBadge key={tag} variant="primary" size="sm">{tag}</TkxBadge>
-                    ))}
-                  </div>
-                  <h3 style={{ fontSize: 16, fontWeight: 700, color: theme.text, lineHeight: 1.4, marginBottom: 10 }}>
-                    {post.title}
-                  </h3>
-                  <p style={{ fontSize: 13.5, color: theme.textMuted, lineHeight: 1.65, marginBottom: 20 }}>
-                    {post.excerpt}
-                  </p>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: theme.textMuted }}>
-                    <span>{post.date}</span>
-                    <span>{post.readTime}</span>
-                  </div>
-                </TkxCardBody>
-                <TkxCardFooter>
-                  <TkxButton variant="ghost" size="sm" style={{ width: '100%' }}>Read More →</TkxButton>
-                </TkxCardFooter>
               </TkxCard>
             ))}
           </div>

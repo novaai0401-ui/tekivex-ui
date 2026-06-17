@@ -59,7 +59,6 @@ import { DashboardTemplate } from './templates/DashboardTemplate';
 import { PortfolioTemplate } from './templates/PortfolioTemplate';
 import { EcommerceTemplate } from './templates/EcommerceTemplate';
 import { SupplyChainTemplate } from './templates/SupplyChainTemplate';
-import { BlogTemplate } from './templates/BlogTemplate';
 import { AdminSettingsTemplate } from './templates/AdminSettingsTemplate';
 import { LandingPageTemplate } from './templates/LandingPageTemplate';
 
@@ -113,7 +112,6 @@ const ROUTE_MAP: Record<string, PageComponent> = {
   '/templates/portfolio': PortfolioTemplate,
   '/templates/ecommerce': EcommerceTemplate,
   '/templates/supply-chain': SupplyChainTemplate,
-  '/templates/blog': BlogTemplate,
   '/templates/admin-settings': AdminSettingsTemplate,
   '/templates/landing-page': LandingPageTemplate,
   '/about': AboutPage,

@@ -61,7 +61,6 @@ const ROUTE_TITLES: Record<string, string> = {
   '/components/command': 'Command',
   '/components/carousel': 'Carousel',
   '/components/icon': 'Icon',
-  '/templates/blog': 'Blog / CMS Template',
   '/templates/admin-settings': 'Admin Settings Template',
   '/templates/landing-page': 'Landing Page Template',
   '/about': 'About Us',
