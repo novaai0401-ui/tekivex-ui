@@ -1,0 +1,29 @@
+import{r as e}from"./rolldown-runtime-S-ySWqyJ.js";import{E as t}from"./vendor-charts-Ch9BG0YP.js";import{t as n}from"./vendor-react-CJ-iRaMF.js";import{Y as r,en as i}from"./tekivex-ui-C9wlHCjq.js";import{t as a}from"./DemoSection-DEixK5oF.js";import{t as o}from"./PropTable-Cy1Qr_aV.js";var s=e(t(),1),c=n(),l=[{name:`trigger`,type:`ReactNode`,default:`—`,description:`The element that triggers the popover on click. Typically a button or icon.`},{name:`content`,type:`ReactNode`,default:`—`,description:`The content rendered inside the popover panel.`},{name:`placement`,type:`'top' | 'bottom' | 'left' | 'right'`,default:`'bottom'`,description:`Preferred placement relative to the trigger. Auto-flips if insufficient viewport space.`},{name:`isOpen`,type:`boolean`,default:`undefined`,description:`Controlled open state. When provided, the component becomes fully controlled.`},{name:`onOpenChange`,type:`(open: boolean) => void`,default:`undefined`,description:`Callback fired when the popover open state changes. Required for controlled mode.`},{name:`closeOnClickOutside`,type:`boolean`,default:`true`,description:`Whether clicking outside the popover closes it.`},{name:`className`,type:`string`,default:`undefined`,description:`Extra class names merged with built-in tkx() classes.`},{name:`style`,type:`CSSProperties`,default:`undefined`,description:`Inline styles merged on top of base popover styles.`}];function u({theme:e}){let[t,n]=(0,s.useState)(!1),u={height:`1px`,backgroundColor:e.border,margin:`48px 0`,border:`none`},d={padding:`16px`,fontSize:`14px`,color:e.text,maxWidth:`240px`,lineHeight:`1.6`};return(0,c.jsxs)(`div`,{style:{maxWidth:900,margin:`0 auto`,padding:`48px 32px 80px`},children:[(0,c.jsx)(`h1`,{style:{fontSize:`2.25rem`,fontWeight:800,color:e.text,margin:`0 0 12px`,letterSpacing:`-0.03em`,lineHeight:1.15},children:`TkxPopover`}),(0,c.jsx)(`p`,{style:{fontSize:`15px`,color:e.textMuted,lineHeight:`1.75`,maxWidth:`640px`,margin:`0 0 48px`},children:`A floating content panel anchored to a trigger element. Supports four placements with automatic flipping, controlled and uncontrolled modes, click-outside dismissal, and portal rendering for correct z-index stacking.`}),(0,c.jsx)(a,{title:`Basic Popover`,description:`Click the trigger button to toggle a popover with content. By default, the popover appears below the trigger and closes when clicking outside.`,theme:e,code:`<TkxPopover
+  trigger={<TkxButton>Open Popover</TkxButton>}
+  content={
+    <div style={{ padding: 16 }}>
+      <p>This is the popover content.</p>
+    </div>
+  }
+/>`,children:(0,c.jsx)(r,{trigger:(0,c.jsx)(i,{children:`Open Popover`}),content:(0,c.jsxs)(`div`,{style:d,children:[(0,c.jsx)(`p`,{style:{margin:`0 0 8px`,fontWeight:600},children:`Popover Title`}),(0,c.jsx)(`p`,{style:{margin:0,color:e.textMuted},children:`This is a basic popover with some descriptive content inside.`})]})})}),(0,c.jsx)(a,{title:`Placements`,description:`Use the placement prop to position the popover relative to the trigger: top, bottom, left, or right. The popover auto-flips when there is insufficient viewport space.`,theme:e,code:`<TkxPopover placement="top"    trigger={<TkxButton>Top</TkxButton>}    content={...} />
+<TkxPopover placement="bottom" trigger={<TkxButton>Bottom</TkxButton>} content={...} />
+<TkxPopover placement="left"   trigger={<TkxButton>Left</TkxButton>}   content={...} />
+<TkxPopover placement="right"  trigger={<TkxButton>Right</TkxButton>}  content={...} />`,children:(0,c.jsx)(`div`,{style:{display:`flex`,flexWrap:`wrap`,gap:`12px`,justifyContent:`center`,padding:`40px 0`},children:[`top`,`bottom`,`left`,`right`].map(t=>(0,c.jsx)(r,{placement:t,trigger:(0,c.jsx)(i,{variant:`outline`,style:{textTransform:`capitalize`},children:t}),content:(0,c.jsx)(`div`,{style:d,children:(0,c.jsxs)(`p`,{style:{margin:0,color:e.textMuted},children:[`Popover placed on the `,(0,c.jsx)(`strong`,{style:{color:e.text},children:t}),`.`]})})},t))})}),(0,c.jsx)(a,{title:`Controlled Popover`,description:`Pass isOpen and onOpenChange to fully control the popover state externally. This allows programmatic open/close, integration with other UI state, or preventing close under certain conditions.`,theme:e,code:`const [open, setOpen] = useState(false);
+
+<TkxPopover
+  isOpen={open}
+  onOpenChange={setOpen}
+  trigger={<TkxButton>Controlled</TkxButton>}
+  content={
+    <div style={{ padding: 16 }}>
+      <p>Controlled popover content</p>
+      <TkxButton size="sm" onClick={() => setOpen(false)}>
+        Close
+      </TkxButton>
+    </div>
+  }
+/>
+
+<TkxButton variant="outline" onClick={() => setOpen(!open)}>
+  Toggle from outside
+</TkxButton>`,children:(0,c.jsxs)(`div`,{style:{display:`flex`,gap:`12px`,alignItems:`center`,flexWrap:`wrap`},children:[(0,c.jsx)(r,{isOpen:t,onOpenChange:n,trigger:(0,c.jsx)(i,{children:`Controlled Trigger`}),content:(0,c.jsxs)(`div`,{style:d,children:[(0,c.jsx)(`p`,{style:{margin:`0 0 12px`,fontWeight:600},children:`Controlled Popover`}),(0,c.jsx)(`p`,{style:{margin:`0 0 12px`,color:e.textMuted},children:`This popover is externally controlled.`}),(0,c.jsx)(i,{size:`sm`,onClick:()=>n(!1),children:`Close from inside`})]})}),(0,c.jsx)(i,{variant:`outline`,onClick:()=>n(!t),children:`Toggle from outside`}),(0,c.jsxs)(`span`,{style:{fontSize:`13px`,color:e.textMuted},children:[`State: `,(0,c.jsx)(`strong`,{style:{color:t?e.primary:e.text},children:t?`Open`:`Closed`})]})]})}),(0,c.jsx)(`hr`,{style:u}),(0,c.jsx)(`h2`,{style:{fontSize:`1.25rem`,fontWeight:700,color:e.text,margin:`0 0 20px`,letterSpacing:`-0.02em`},children:`Props Reference`}),(0,c.jsx)(`div`,{style:{marginBottom:`48px`},children:(0,c.jsx)(o,{props:l})})]})}export{u as PopoverPage};

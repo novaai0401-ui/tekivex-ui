@@ -1,0 +1,1 @@
+import{ar as i,y as r,aF as e}from"./Preview.CSiPW31e.js";import"./index.BJHLxEsq.js";/* empty css                            */function o(){return i.jsx(r,{label:"Sign with mouse, finger, or stylus",children:i.jsx(e,{label:"Sign here",width:400,height:150})})}export{o as SignaturePadBasic};

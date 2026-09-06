@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>/* one domain: retired *.tekivex.com hosts forward to www.tekivex.com/<app>/ */(function(h,p){if(/\.tekivex\.com$/.test(h)&&h!=='www.tekivex.com'){var m={'ui.tekivex.com':'/ui','griddata.tekivex.com':'/gridstorm','analytics.tekivex.com':'/analytics','dataflow.tekivex.com':'/dataflow'};location.replace('https://www.tekivex.com'+(m[h]||'')+p+location.search+location.hash)}})(location.hostname,location.pathname)</script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>When setPointerCapture is not enough: a FlowChart drag bug — TekiVex UI engineering blog</title>
+    <meta name="description" content="We shipped a node-connector port, the visual was perfect, the tests passed, but real browsers refused to draw the edge. The fix was to give up on pointer…" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="author" content="TekiVex UI contributors" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://www.tekivex.com/ui/blog/flowchart-window-listeners" />
+
+    <!-- Search-engine ownership verification.
+         Google Search Console + Bing Webmaster Tools check the root URL for
+         these. The prerender's makeHtml() only rewrites title/description/
+         canonical/og/twitter, so these survive into every prerendered page. -->
+    <meta name="google-site-verification" content="iJGXqeB5Lxtpbl6GP-wcDDNHViHyKCE7WTeu08E4F7Y" />
+    <meta name="msvalidate.01" content="15ACD6CF5E1FCB9BA9E115BA8C0B6BD8" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TekiVex UI" />
+    <meta property="og:title" content="When setPointerCapture is not enough: a FlowChart drag bug — TekiVex UI engineering blog" />
+    <meta property="og:description" content="We shipped a node-connector port, the visual was perfect, the tests passed, but real browsers refused to draw the edge. The fix was to give up on pointer…" />
+    <meta property="og:url" content="https://www.tekivex.com/ui/blog/flowchart-window-listeners" />
+    <meta property="og:locale" content="en_US" />
+    <!-- og:image — REQUIRED for a preview card to appear when the link is
+         shared (WhatsApp / Slack / iMessage / Twitter / LinkedIn / Facebook).
+         Absolute URL; the file is placed at the site root by the unified
+         build (scripts/build-unified-site.mjs Step 5b). 1200×630, <300 KB so
+         WhatsApp (which caps preview images at ~300 KB) still renders it. -->
+    <meta property="og:image" content="https://www.tekivex.com/ui/og-image.png" />
+    <meta property="og:image:secure_url" content="https://www.tekivex.com/ui/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="TekiVex UI — production-grade React component library" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="When setPointerCapture is not enough: a FlowChart drag bug — TekiVex UI engineering blog" />
+    <meta name="twitter:description" content="We shipped a node-connector port, the visual was perfect, the tests passed, but real browsers refused to draw the edge. The fix was to give up on pointer…" />
+    <meta name="twitter:image" content="https://www.tekivex.com/ui/og-image.png" />
+    <meta name="twitter:image:alt" content="TekiVex UI — production-grade React component library" />
+    <meta name="twitter:site" content="@007krcs" />
+    <meta name="twitter:creator" content="@007krcs" />
+
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4630229006617891"
+            crossorigin="anonymous"></script>
+    <meta name="google-adsense-account" content="ca-pub-4630229006617891" />
+
+    <!-- Structured data: Organization + WebSite for Google rich results -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "TekiVex UI",
+            "url": "https://www.tekivex.com/ui/",
+            "logo": "https://www.tekivex.com/ui/favicon.svg",
+            "sameAs": [
+              "https://www.npmjs.com/package/tekivex-ui",
+              "https://www.npmjs.com/package/tekivex-3d",
+              "https://github.com/007krcs/tekivex-ui"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "name": "TekiVex UI documentation",
+            "url": "https://www.tekivex.com/ui/",
+            "inLanguage": "en",
+            "publisher": { "@type": "Organization", "name": "TekiVex UI" },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://www.tekivex.com/ui/docs?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": "TekiVex UI",
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "Web",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "license": "https://opensource.org/licenses/MIT"
+          }
+        ]
+      }
+    </script>
+    <script type="module" crossorigin src="/ui/assets/index-CnQ23JLu.js"></script>
+    <link rel="modulepreload" crossorigin href="/ui/assets/rolldown-runtime-S-ySWqyJ.js">
+    <link rel="modulepreload" crossorigin href="/ui/assets/vendor-react-SwSemskP.js">
+    <link rel="stylesheet" crossorigin href="/ui/assets/index-CQ0aOQhD.css">
+      <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"When setPointerCapture is not enough: a FlowChart drag bug","description":"We shipped a node-connector port, the visual was perfect, the tests passed, but real browsers refused to draw the edge. The fix was to give up on pointer capture and listen on window directly. Here is the story.","mainEntityOfPage":{"@type":"WebPage","@id":"https://www.tekivex.com/ui/blog/flowchart-window-listeners"},"url":"https://www.tekivex.com/ui/blog/flowchart-window-listeners","datePublished":"2026-04-22","dateModified":"2026-04-22","author":{"@type":"Organization","name":"TekiVex UI"},"publisher":{"@type":"Organization","name":"TekiVex UI","url":"https://www.tekivex.com/ui","logo":{"@type":"ImageObject","url":"https://www.tekivex.com/ui/favicon.svg"}}}</script>
+  </head>
+  <body>
+    <div id="root">
+      <main style="max-width:760px;margin:0 auto;padding:64px 24px;color:#1a1a2a;font:16px/1.65 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+        <nav aria-label="Breadcrumb" style="font-size:13px;color:#6b6b8a;margin-bottom:24px"><a href="/ui/" style="color:#3a86ff;text-decoration:none">Home</a></nav>
+        <h1 style="font-size:2.4rem;font-weight:800;letter-spacing:-0.025em;color:#0a0a1a;margin:0 0 12px;line-height:1.15">When setPointerCapture is not enough: a FlowChart drag bug</h1>
+        <p style="color:#3a3a52;font-size:18px;line-height:1.6;margin:0 0 32px">We shipped a node-connector port, the visual was perfect, the tests passed, but real browsers refused to draw the edge. The fix was to give up on pointer capture and listen on window directly. Here is the story.</p>
+        <p style="color:#6b6b8a;font-size:13px;border-top:1px solid #e6e6ee;padding-top:20px">TekiVex UI · open-source React component library · MIT licensed · <a href="/ui/about" style="color:#3a86ff;text-decoration:none">About</a> · <a href="/ui/docs" style="color:#3a86ff;text-decoration:none">Docs</a> · <a href="/ui/blog" style="color:#3a86ff;text-decoration:none">Blog</a></p>
+      </main></div>
+    <noscript>
+      <div style="padding:24px;font-family:system-ui,sans-serif;color:#0f172a;background:#ffffff">
+        <h1>TekiVex UI</h1>
+        <p>
+          TekiVex UI is an open-source React component library. The interactive
+          documentation requires JavaScript, but you can browse the project on
+          <a href="https://www.npmjs.com/package/tekivex-ui" style="color:#4f46e5">npm</a>
+          or read the source on
+          <a href="https://github.com/007krcs/tekivex-ui" style="color:#4f46e5">GitHub</a>.
+        </p>
+      </div>
+    </noscript>
+  </body>
+</html>

@@ -1,0 +1,494 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script>/* one domain: retired *.tekivex.com hosts forward to www.tekivex.com/<app>/ */(function(h,p){if(/\.tekivex\.com$/.test(h)&&h!=='www.tekivex.com'){var m={'ui.tekivex.com':'/ui','griddata.tekivex.com':'/gridstorm','analytics.tekivex.com':'/analytics','dataflow.tekivex.com':'/dataflow'};location.replace('https://www.tekivex.com'+(m[h]||'')+p+location.search+location.hash)}})(location.hostname,location.pathname)</script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- ── Primary SEO ──────────────────────────────────────────────────────── -->
+    <title>TekiVex UI — Accessible React Component Library | WCAG 2.1 AA + APG</title>
+    <meta name="description" content="TekiVex UI — accessible React component library. 116 components, WCAG 2.1 AA with WAI-ARIA APG patterns, XSS sanitisation, zero runtime deps. npm install tekivex-ui." />
+    <meta name="keywords" content="tekivex-ui, tekivex, react component library, accessible components, wcag 2.1 aaa, wai-aria, typescript ui library, atomic css, open source react, tailwind alternative, react ui kit, react 19, react server components, vite react components, webpack react components, next.js component library, react xss protection, zero runtime css" />
+    <meta name="author" content="007krcs" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <link rel="canonical" href="https://www.tekivex.com/ui/playground/" />
+
+    <!-- Search-engine ownership verification (Google Search Console + Bing) -->
+    <meta name="google-site-verification" content="iJGXqeB5Lxtpbl6GP-wcDDNHViHyKCE7WTeu08E4F7Y" />
+    <meta name="msvalidate.01" content="15ACD6CF5E1FCB9BA9E115BA8C0B6BD8" />
+
+    <!-- ── Open Graph (Facebook / LinkedIn) ────────────────────────────────── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TekiVex UI" />
+    <meta property="og:title" content="TekiVex UI — Accessible React Component Library" />
+    <meta property="og:description" content="TekiVex UI — accessible React component library. 116 components, WCAG 2.1 AA with WAI-ARIA APG patterns, XSS sanitisation, zero runtime deps. npm install tekivex-ui." />
+    <meta property="og:url" content="https://www.tekivex.com/ui/" />
+    <meta property="og:image" content="https://www.tekivex.com/ui/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="TekiVex UI component library preview" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- ── Twitter Card ─────────────────────────────────────────────────────── -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TekiVex UI — Accessible React Component Library" />
+    <meta name="twitter:description" content="Production-ready React components targeting WCAG 2.1 AA with WAI-ARIA APG patterns, TKX atomic CSS engine, and zero-trust security. Free & open source." />
+    <meta name="twitter:image" content="https://www.tekivex.com/ui/og-image.png" />
+    <meta name="twitter:image:alt" content="TekiVex UI component library preview" />
+    <meta name="twitter:site" content="@007krcs" />
+    <meta name="twitter:creator" content="@007krcs" />
+
+    <!-- ── Theme / App appearance ───────────────────────────────────────────── -->
+    <meta name="theme-color" content="#00f5d4" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="application-name" content="TekiVex UI" />
+
+    <!-- ── Favicon ──────────────────────────────────────────────────────────── -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+
+    <!-- ── Structured Data (JSON-LD) ────────────────────────────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "TekiVex UI",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "Production-ready React component library targeting WCAG 2.1 AA accessibility with WAI-ARIA APG patterns, TKX atomic CSS engine, zero-trust security, and 116 fully-typed components. Free and open source under the MIT license.",
+      "url": "https://www.tekivex.com/ui/",
+      "version": "3.0.3",
+      "license": "https://www.tekivex.com/ui",
+      "codeRepository": "https://www.tekivex.com/ui",
+      "programmingLanguage": ["TypeScript", "React", "CSS"],
+      "keywords": "react, component library, wcag, accessibility, aria, typescript, atomic css, ai components, react server components, open source",
+      "featureList": [
+        "116 accessible React components",
+        "WCAG 2.1 AA target with WAI-ARIA APG patterns",
+        "WAI-ARIA 1.2 support",
+        "Zero-trust security with XSS sanitization",
+        "React Server Components support",
+        "TypeScript with full prop types",
+        "TKX atomic CSS engine",
+        "AI-native components (ConfidenceBar, ChatBubble, Thinking)",
+        "Real-time streaming components",
+        "7 production-ready page templates",
+        "MIT license - free for personal and commercial use"
+      ],
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "007krcs",
+        "url": "https://www.tekivex.com/ui"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "TekiVex",
+        "url": "https://tekivex.com"
+      },
+      "downloadUrl": "https://www.npmjs.com/package/tekivex-ui",
+      "installUrl": "https://www.npmjs.com/package/tekivex-ui",
+      "softwareVersion": "3.0.3",
+      "dateModified": "2026-04-27",
+      "inLanguage": "en"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is TekiVex UI?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TekiVex UI is a production-ready React component library with 116 components targeting WCAG 2.1 AA accessibility with WAI-ARIA APG patterns, zero-trust security, and full TypeScript support. It is free and open source under the MIT license."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I install TekiVex UI?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Install TekiVex UI with npm: npm install tekivex-ui. Then import components: import { TkxButton, TkxCard } from 'tekivex-ui'. Wrap your app with ThemeProvider to apply the theme."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which bundlers and frameworks does TekiVex UI support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TekiVex UI works with Vite (5/6/7/8), Webpack 5, Next.js (App Router and Pages Router), Remix, React Router 7, Parcel 2, Rollup, Astro, and Create React App. Full configuration recipes for every bundler are available at https://www.tekivex.com/ui/#/bundlers — copy-pasteable webpack.config.js, vite.config.ts, next.config.js, and rollup.config.js snippets included."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does TekiVex UI work with Vite?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. TekiVex UI is ESM-first and ships TypeScript declarations, so Vite needs no special config. Install with npm install tekivex-ui, import the stylesheet via 'tekivex-ui/styles', and wrap your app in ThemeProvider. Optionally add 'tekivex-ui' to optimizeDeps.include for faster cold starts."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does TekiVex UI work with Next.js App Router?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. TekiVex UI fully supports Next.js App Router with 13 RSC-compatible components that render on the server without 'use client'. Add 'tekivex-ui' to transpilePackages and optimizePackageImports in next.config.js, then create a client-component Providers wrapper that mounts ThemeProvider."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does TekiVex UI work with Webpack?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. TekiVex UI works with Webpack 5. Add style-loader and css-loader to handle the 'tekivex-ui/styles' import, ensure conditionNames includes 'import' for the export map, and import 'tekivex-ui/styles' in your entry point. Modern Webpack tree-shakes unused components automatically thanks to the package's sideEffects field."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is TekiVex UI free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. TekiVex UI is completely free and open source under the MIT license. You can use it in personal and commercial projects without any cost or attribution requirement."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does TekiVex UI support React Server Components?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. 13 components in TekiVex UI are fully RSC-compatible and can render in Next.js App Router server components without a 'use client' directive: TkxBadge, TkxAvatar, TkxDivider, TkxTypography, TkxSkeleton, TkxSpin, TkxEmpty, TkxStatistic, TkxTag, TkxCard, TkxAlert, TkxProgress, and TkxTimeline."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What accessibility level does TekiVex UI support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TekiVex UI targets WCAG 2.1 AA with WAI-ARIA APG patterns throughout; AAA is a tracked aspiration, not a certification. All components use semantic HTML, WAI-ARIA 1.2 roles and properties, keyboard navigation, visible focus indicators, and respect the prefers-reduced-motion media query."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does TekiVex UI have AI components?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. TekiVex UI v3.0 includes four AI-native components: TkxAIConfidenceBar (colour-coded confidence meter with animation), TkxAIChatBubble (streaming chat messages with typewriter effect), TkxAIThinking (processing indicators in dots, pulse, wave, and orbit variants), and TkxChat (full chat interface with attachments and reactions)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the TKX CSS engine?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TKX is TekiVex UI's built-in atomic CSS engine that generates optimized styles at build time. It produces minimal CSS output by only including the styles actually used by your components, unlike Tailwind CSS which includes a large utility stylesheet."
+          }
+        }
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "TekiVex UI",
+      "url": "https://www.tekivex.com/ui/",
+      "description": "Documentation for TekiVex UI, an accessible React component library with 116 components, a WCAG 2.1 AA target with APG patterns, and zero-trust security.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.tekivex.com/ui/#/components/{search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- ── Google Analytics (GA4) ────────────────────────────────────────────── -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E7HBFMG7BG"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-E7HBFMG7BG');
+    </script>
+
+    <!-- No ad scripts here: the demo is a pure interactive tool surface
+         (playground, dashboards), and AdSense placement policy prohibits ad
+         units on such screens. ads.txt is kept so the subdomain stays covered
+         under the apex account. -->
+
+    <!-- ── Babel Standalone — JSX runtime transform for TkxPlayground ─────── -->
+    <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js" crossorigin="anonymous"></script>
+
+    <!-- ── Accessibility + Responsive Mobile/Tablet/Desktop Baseline ─────── -->
+    <style>
+      :focus-visible {
+        outline: 2px solid #00f5d4;
+        outline-offset: 2px;
+        border-radius: 3px;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html, body {
+        max-width: 100vw;
+        /* overflow-x: hidden on both html AND body promotes overflow-y to
+           `auto` on both (CSS Overflow spec) — stacking scroll contexts
+           that fight each other. Use `clip` on body only — clips without
+           establishing a scroll container. Falls back to `hidden` on
+           browsers older than Safari 16 / Firefox 81 / Chrome 90. */
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        overflow-x: hidden;  /* fallback */
+        overflow-x: clip;
+      }
+      body {
+        margin: 0;
+      }
+      img, video, canvas, svg, iframe {
+        max-width: 100%;
+        height: auto;
+      }
+      .tkx-skip-link {
+        position: absolute;
+        top: -100px;
+        left: 0;
+        background: #00f5d4;
+        color: #0a0a0f;
+        padding: 12px 20px;
+        font-weight: 700;
+        text-decoration: none;
+        z-index: 10000;
+        border-radius: 0 0 8px 0;
+      }
+      .tkx-skip-link:focus {
+        top: 0;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+      /* ── Mobile (≤640 px) — collapse rigid multi-column grids only ───── */
+      @media (max-width: 640px) {
+        /* Collapse RIGID multi-column inline grids. We only target patterns
+           that clearly assume desktop widths. Responsive grids (auto-fill,
+           minmax, or pages that already branch on isMobile) are NOT touched. */
+        [style*="repeat(3, 1fr)"],
+        [style*="repeat(3,1fr)"],
+        [style*="repeat(4, 1fr)"],
+        [style*="repeat(4,1fr)"],
+        [style*="1fr 1fr 1fr"],
+        [style*="2fr 1fr"] {
+          grid-template-columns: 1fr !important;
+        }
+        /* Never let any grid child exceed the screen — applies to any grid */
+        [style*="display: grid"] > *,
+        [style*="display:grid"] > * {
+          min-width: 0 !important;
+          max-width: 100% !important;
+        }
+        /* Trim large horizontal padding */
+        [style*="padding: 48px 32px"],
+        [style*="padding:48px 32px"] {
+          padding: 24px 16px 40px !important;
+        }
+        [style*="padding: 40px 32px"],
+        [style*="padding:40px 32px"] {
+          padding: 20px 16px !important;
+        }
+        [style*="padding: 80px 32px"],
+        [style*="padding:80px 32px"] {
+          padding: 40px 16px !important;
+        }
+        [style*="padding: 0 32px"],
+        [style*="padding:0 32px"] {
+          padding-left: 16px !important;
+          padding-right: 16px !important;
+        }
+        [style*="padding: 80px 40px"],
+        [style*="padding:80px 40px"] {
+          padding: 40px 20px !important;
+        }
+        /* Hero headlines wrap better on small screens */
+        h1, h2, h3 {
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          hyphens: auto;
+        }
+        /* Tables become horizontally scrollable instead of overflowing the layout */
+        table {
+          display: block;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+        /* Any flex bar (tabs, toolbar) scrolls horizontally if it overflows */
+        [style*="display: flex"][style*="overflow"],
+        [style*="display:flex"][style*="overflow"] {
+          overflow-x: auto !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+      }
+      /* ── Tablet (641–960 px) — reduce 4-col grids to 2-col, keep some padding */
+      @media (min-width: 641px) and (max-width: 960px) {
+        [style*="repeat(4, 1fr)"],
+        [style*="repeat(4,1fr)"] {
+          grid-template-columns: repeat(2, 1fr) !important;
+        }
+        [style*="repeat(3, 1fr)"],
+        [style*="repeat(3,1fr)"] {
+          grid-template-columns: repeat(2, 1fr) !important;
+        }
+      }
+    </style>
+    <script type="module" crossorigin src="/ui/playground/assets/index-BLCt_kC2.js"></script>
+    <link rel="modulepreload" crossorigin href="/ui/playground/assets/rolldown-runtime-S-ySWqyJ.js">
+    <link rel="modulepreload" crossorigin href="/ui/playground/assets/vendor-charts-Ch9BG0YP.js">
+    <link rel="modulepreload" crossorigin href="/ui/playground/assets/vendor-react-CJ-iRaMF.js">
+    <link rel="modulepreload" crossorigin href="/ui/playground/assets/tekivex-ui-C9wlHCjq.js">
+    <link rel="stylesheet" crossorigin href="/ui/playground/assets/tekivex-ui-DO2FOaH5.css">
+  </head>
+  <body>
+    <a href="#main-content" class="tkx-skip-link">Skip to main content</a>
+    <div id="root"></div>
+
+    <!--
+      ── Static pre-rendered content for search engine crawlers ───────────────
+      Googlebot and AdSense crawlers that don't execute JavaScript will read
+      this section. React replaces it on the client. Hidden via inline style.
+    -->
+    <div id="tkx-static-content" style="display:none" aria-hidden="true">
+      <header>
+        <h1>TekiVex UI — Accessible React Component Library</h1>
+        <p>TekiVex UI is a production-ready React component library targeting WCAG 2.1 AA accessibility with WAI-ARIA APG patterns, TKX atomic CSS engine, zero-trust security, and 116 fully-typed components. Free and open source under the MIT license.</p>
+        <nav>
+          <ul>
+            <li><a href="#/getting-started">Getting Started</a></li>
+            <li><a href="#/bundlers">Bundler Integration (Vite, Webpack, Next.js, Remix, Parcel)</a></li>
+            <li><a href="#/ecosystem">Ecosystem (security-core, audit, figma-kit, scaffolder)</a></li>
+            <li><a href="#/components/button">Button</a></li>
+            <li><a href="#/components/input">Input</a></li>
+            <li><a href="#/components/modal">Modal</a></li>
+            <li><a href="#/components/table">Table</a></li>
+            <li><a href="#/ai-components">AI Components</a></li>
+            <li><a href="#/security">Security Engine</a></li>
+            <li><a href="#/blog">Blog</a></li>
+            <li><a href="#/privacy-policy">Privacy Policy</a></li>
+            <li><a href="#/about">About</a></li>
+          </ul>
+        </nav>
+      </header>
+
+      <main id="main-content">
+        <section>
+          <h2>What is TekiVex UI?</h2>
+          <p>TekiVex UI is a comprehensive, open-source React component library built for teams that take accessibility, performance, and security seriously. Components target WCAG 2.1 AA with WAI-ARIA APG patterns (an internal APG audit with all 35 findings fixed is published in the repo), and every component is fully keyboard navigable with complete WAI-ARIA 1.2 support.</p>
+          <p>The library ships 78 components covering everything from basic primitives (Button, Input, Badge, Progress) to complex interactive widgets (DataGrid, DatePicker, RichTextDisplay, Command, Carousel, VideoPlayer) to real-time streaming components (LiveFeed, LiveMetrics, RealTimeChart, LiveLog) and AI-native components (TkxAIConfidenceBar, TkxAIChatBubble, TkxAIThinking).</p>
+          <p>Install with: npm install tekivex-ui</p>
+        </section>
+
+        <section>
+          <h2>78 Production-Ready React Components</h2>
+          <p>Every component in TekiVex UI is written in TypeScript with full prop typing, designed with a zero-trust security model, and tested against WCAG 2.1 AA criteria. Components are tree-shakeable, zero-dependency (React is the only peer dep), and work in both client-rendered and React Server Component environments.</p>
+          <h3>Core UI Components</h3>
+          <p>Button, Card, Input, Badge, Progress, Toggle, Alert, Modal, Tabs, Tooltip, Skeleton, Avatar, Table, Divider, Select, Checkbox, Radio, Toast, Accordion, Drawer, DatePicker, Slider, Pagination, Image, FileUpload, Rating, Chat, Tag, Timeline, Menu, Clock, VideoPlayer, Stepper, ColorPicker, NumberInput, OTPInput, Command, Carousel, Icon, Breadcrumb, Popover, Autocomplete, TreeView, Toolbar, TransferList, SpeedDial, AppBar, BottomNav, Snackbar, DataGrid, Masonry, RichText, Form, Layout, Typography, Spin, Empty, Statistic, ConfigProvider, Affix, Anchor, Cascader, Mentions, QRCode, Result, Segmented, Tour, Watermark</p>
+          <h3>AI-Native Components</h3>
+          <p>TkxAIConfidenceBar renders a colour-coded meter (0–100) for AI model confidence scores, with smooth animation and full screen reader support via role="meter". TkxAIChatBubble handles user and assistant messages with streaming typewriter animation, XSS sanitization, and a copy button. TkxAIThinking shows AI processing states in four variants: dots, pulse, wave, and orbit.</p>
+          <h3>Real-Time Components</h3>
+          <p>LiveFeed streams live data entries with auto-scroll. LiveMetrics displays real-time KPI cards. RealTimeChart renders a live-updating line chart. LiveLog tails log output with level-based colour coding. DataGridInfinite handles infinite-scroll data tables with server-side pagination.</p>
+          <h3>Charts</h3>
+          <p>TekiVex UI includes TkxLineChart, TkxBarChart, TkxAreaChart, TkxPieChart, TkxDonutChart, TkxScatterChart, and TkxRadarChart — all responsive, accessible, and built without recharts or d3 dependencies.</p>
+        </section>
+
+        <section>
+          <h2>Accessibility: WCAG 2.1 AA target, APG patterns throughout</h2>
+          <p>WCAG 2.1 AAA is the highest level of web accessibility conformance defined by the W3C Web Accessibility Initiative. It encompasses all Level A and AA criteria plus additional requirements including: 7:1 colour contrast ratio for text, 44x44 pixel minimum touch targets, focus indicators at least 2px thick, full keyboard operability for all interactive elements, error prevention for forms, and animation controls for users with vestibular disorders.</p>
+          <p>TekiVex UI targets WCAG 2.1 AA across all 116 components — verified by an internal WAI-ARIA APG audit (all 35 confirmed findings fixed with regression tests); AAA remains a tracked aspiration, not a claim. Every component uses semantic HTML, appropriate ARIA roles and properties, keyboard event handlers, visible focus indicators with 2px outline, and respects prefers-reduced-motion.</p>
+        </section>
+
+        <section>
+          <h2>Zero-Trust Security Model</h2>
+          <p>TekiVex UI's security engine sanitizes all user-provided string content before rendering. The built-in sanitizeString() function strips HTML tags, removes javascript: and data: URL schemes, and encodes special characters. This prevents cross-site scripting (XSS) attacks even when rendering user-generated content. The library ships with zero production runtime dependencies, reducing supply chain attack surface to a minimum.</p>
+        </section>
+
+        <section>
+          <h2>React Server Components Support</h2>
+          <p>13 of TekiVex UI's 78 components are fully compatible with React Server Components (RSC): TkxBadge, TkxAvatar, TkxDivider, TkxTypography, TkxSkeleton, TkxSpin, TkxEmpty, TkxStatistic, TkxTag, TkxCard, TkxAlert, TkxProgress, TkxTimeline. These components use no hooks or browser APIs and can render on the server in Next.js App Router, Remix, or any RSC-compatible framework.</p>
+        </section>
+
+        <section>
+          <h2>TKX Atomic CSS Engine</h2>
+          <p>TekiVex UI ships with TKX, a zero-runtime atomic CSS engine that generates optimized class names at build time. Unlike Tailwind CSS which requires a large utility CSS file, TKX generates only the styles your components actually use, resulting in minimal CSS bundle sizes.</p>
+        </section>
+
+        <section>
+          <h2>Bundler Integration — Vite, Webpack, Next.js, Remix, Parcel, Astro</h2>
+          <p>TekiVex UI works with every major React bundler and meta-framework. Drop-in integration recipes are available at /bundlers.</p>
+          <h3>Vite (recommended)</h3>
+          <p>npm install tekivex-ui — then import 'tekivex-ui/styles' and wrap your app in ThemeProvider. No special vite.config.ts changes required. Optionally add tekivex-ui to optimizeDeps.include for faster dev cold-starts.</p>
+          <h3>Next.js App Router</h3>
+          <p>Add 'tekivex-ui' to transpilePackages and optimizePackageImports in next.config.js. Create a client-component Providers wrapper for ThemeProvider. 13 RSC-compatible components (TkxBadge, TkxAvatar, TkxCard, TkxAlert, TkxProgress, TkxTimeline, etc.) render on the server without 'use client'.</p>
+          <h3>Next.js Pages Router</h3>
+          <p>Same as App Router but mount ThemeProvider in pages/_app.tsx. transpilePackages required.</p>
+          <h3>Webpack 5</h3>
+          <p>Configure style-loader and css-loader for the CSS import. Set resolve.conditionNames to ['import', 'require', 'default'] for export-map resolution. Tree-shaking works automatically via the sideEffects field.</p>
+          <h3>Remix / React Router 7</h3>
+          <p>Load the stylesheet via the route module's links() function: import tekivexStyles from 'tekivex-ui/dist/style.css?url'.</p>
+          <h3>Parcel, Rollup, Astro, CRA</h3>
+          <p>Parcel 2 is zero-config. Rollup library consumers should externalise tekivex-ui as a peer. Astro works via React islands with client:load. Create React App is supported but we recommend migrating to Vite for faster builds.</p>
+        </section>
+
+        <section>
+          <h2>Getting Started</h2>
+          <p>Install TekiVex UI from npm: npm install tekivex-ui</p>
+          <p>Import the ThemeProvider and wrap your app: import { ThemeProvider, quantumDark } from 'tekivex-ui';</p>
+          <p>Then import and use any component: import { TkxButton, TkxCard, TkxInput } from 'tekivex-ui';</p>
+          <p>TekiVex UI version 3.0.3 is available now on npm. The library is MIT licensed and free for personal and commercial use. v3.0 ships 99 components, a built-in security kernel, and 1034 passing tests.</p>
+        </section>
+
+        <section>
+          <h2>Templates</h2>
+          <p>TekiVex UI includes seven complete page templates: Dashboard (analytics with charts and KPIs), Portfolio (personal/agency showcase), E-commerce (product catalogue and shopping cart), Supply Chain (logistics and warehouse management), Blog/CMS (article listing and reading), Admin Settings (tabbed configuration panel), Landing Page (marketing page with hero, features, pricing, and FAQ).</p>
+        </section>
+
+        <section>
+          <h2>Blog</h2>
+          <p>The TekiVex UI blog publishes in-depth technical articles on React development, accessibility, security, and AI-powered UIs. Recent articles: Building Accessible React Components: A Complete WCAG + APG Guide, Why Zero-Trust Security Matters in UI Component Libraries, React Server Components: What Every Developer Needs to Know in 2026, Building AI-Powered UIs: Confidence Bars, Chat Bubbles and Thinking Indicators.</p>
+        </section>
+
+        <section>
+          <h2>Open Source</h2>
+          <p>TekiVex UI is fully open source under the MIT license. Source code is available on GitHub at www.tekivex.com/ui. The package is published to npm as tekivex-ui and can be installed with npm install tekivex-ui or yarn add tekivex-ui. TekiVex UI was created by 007krcs and is free for all personal and commercial projects.</p>
+        </section>
+      </main>
+
+      <footer>
+        <p>TekiVex UI v3.0.3 — MIT License — Copyright 2026 007krcs</p>
+        <nav>
+          <ul>
+            <li><a href="#/about">About</a></li>
+            <li><a href="#/license">License</a></li>
+            <li><a href="#/blog">Blog</a></li>
+            <li><a href="#/privacy-policy">Privacy Policy</a></li>
+            <li><a href="https://www.tekivex.com/ui">GitHub</a></li>
+            <li><a href="https://www.npmjs.com/package/tekivex-ui">npm</a></li>
+          </ul>
+        </nav>
+      </footer>
+    </div>
+
+  </body>
+</html>
