@@ -1,0 +1,131 @@
+---
+title: Agent-operable UI (WebMCP)
+description: Let AI browser agents discover and safely operate your tekivex-ui app — navigator.modelContext bridge, DOM manifest, schema validation, confirmation gates and a hash-chained audit trail. Zero dependencies.
+---
+
+import { Aside, Card, CardGrid } from '@astrojs/starlight/components';
+
+Browser agents are a second user of every web app now: Chrome's WebMCP
+preview exposes `navigator.modelContext`, computer-use models drive pages
+through the accessibility tree, and in-page copilots call whatever a page lets
+them. Today they all **guess** what a widget does.
+
+`tekivex-ui/webmcp` lets your components **declare** what they do — and runs
+every agent call through the same security kernel as the rest of the library.
+
+```bash
+# already in the package — no extra install
+import { useAgentTool, useFormAgentTool, TkxAgentConfirm } from 'tekivex-ui/webmcp';
+```
+
+<CardGrid>
+  <Card title="Three discovery surfaces" icon="rocket">
+    `navigator.modelContext.registerTool()` when the browser has it, plus a
+    frozen `window.__tekivex_agent_tools__` snapshot and an inert
+    `<script type="application/tekivex-agent-tools+json">` manifest in
+    `<head>` — so agents that only see a DOM dump still find the catalog.
+  </Card>
+  <Card title="Validation + sanitisation" icon="approve-check">
+    Required keys, enums, bounds and patterns enforced; unknown keys rejected;
+    `__proto__` stripped; control, bidi and zero-width characters removed from
+    every string before your handler sees it.
+  </Card>
+  <Card title="Confirmation gates" icon="warning">
+    `requiresConfirmation: true` tools refuse to run until a human approves
+    in `TkxAgentConfirm`. No confirm UI mounted → the tool refuses. Fail closed.
+  </Card>
+  <Card title="Rate limit + audit" icon="seti:clock">
+    Per-tool token bucket (30 calls / min by default). Every registration,
+    call and refusal lands in the SHA-256 hash-chained audit log.
+  </Card>
+</CardGrid>
+
+## Declare a tool
+
+```tsx
+import { useAgentTool } from 'tekivex-ui/webmcp';
+
+useAgentTool({
+  name: 'ui.set_theme',
+  description: 'Switch the application colour scheme between light and dark.',
+  inputSchema: {
+    type: 'object',
+    properties: { mode: { type: 'string', enum: ['light', 'dark'] } },
+    required: ['mode'],
+  },
+  handler: ({ mode }) => {
+    setMode(mode as 'light' | 'dark');
+    return { summary: `Theme set to ${mode}.` };
+  },
+});
+```
+
+Names are `namespace.verb_noun`; descriptions must be at least 20 characters
+because agents choose tools by reading them. The latest handler is always
+used, so no `useCallback` is needed. Unmount unregisters.
+
+## Expose a whole form
+
+```tsx
+const form = useTkxForm();
+
+useFormAgentTool(form, {
+  namespace: 'checkout',
+  purpose: 'Complete the checkout form for the current cart.',
+  fields: [
+    { name: 'email', description: 'Receipt email', required: true },
+    { name: 'qty', description: 'Number of items', type: 'integer', minimum: 1, maximum: 10 },
+  ],
+  onSubmit: async (values) => { await placeOrder(values); return 'Order placed.'; },
+});
+```
+
+| Generated tool | Behaviour |
+|---|---|
+| `checkout.describe` | Read-only — current values, errors, required fields |
+| `checkout.fill` | Partial update; the form's own `rules` still run |
+| `checkout.submit` | Validate everything, then `onSubmit`. Confirmation-gated by default |
+
+The agent cannot bypass validation: the schema rejects out-of-range input
+before it touches the form, and `TkxFormField` rules run after.
+
+## Human in the loop
+
+```tsx
+<ThemeProvider theme={auroraLight}>
+  <App />
+  <TkxAgentConfirm />
+</ThemeProvider>
+```
+
+The dialog shows the tool, its description and the sanitised input with
+Allow / Deny. Requests queue; unmounting denies anything pending.
+
+## Outcomes an agent can act on
+
+```ts
+const out = await callAgentTool('checkout.fill', { email: 'a@b.co' });
+// ok:true  → { result: { summary, data } }
+// ok:false → error: 'invalid_input' | 'rate_limited' | 'not_found'
+//                 | 'confirmation_required' | 'confirmation_denied' | 'handler_failed'
+```
+
+Unknown tools come back with ranked suggestions — the registry never invents
+one, the same rule the [MCP server](https://github.com/007krcs/tekivex-ui/blob/master/docs/MCP-SERVER.md) follows.
+
+<Aside type="note" title="Spec status">
+WebMCP is an early W3C community-group proposal with Chrome and Edge previews;
+`navigator.modelContext` may change. This module feature-detects it at call
+time and never depends on it — the global and DOM manifests work in every
+browser shipped since 2017.
+</Aside>
+
+## How this fits the other AI entries
+
+| Entry | Direction | For |
+|---|---|---|
+| `tekivex-ui/mcp` | Assistant → this library's source | Developers building with tekivex-ui in Claude / Cursor |
+| `tekivex-ui/agent` | Your app → model providers | Apps embedding an LLM agent |
+| `tekivex-ui/webmcp` | Browser agent → your running UI | End users whose assistant operates your product |
+
+Full reference with every export: [docs/WEBMCP.md](https://github.com/007krcs/tekivex-ui/blob/master/docs/WEBMCP.md).

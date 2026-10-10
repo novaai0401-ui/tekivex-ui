@@ -39,6 +39,11 @@ Source: https://github.com/007krcs/tekivex-ui
 
 - [All components](https://www.tekivex.com/ui/components/): Full component reference — buttons, inputs, data grid, charts, overlays, layout, navigation, and the Indian KYC pack. Each page has live interactive demos.
 
+## AI agents
+
+- [Agent-operable UI (WebMCP)](https://www.tekivex.com/ui/webmcp/): tekivex-ui/webmcp — components declare tools that AI browser agents discover via navigator.modelContext, a window snapshot and a DOM manifest; every call is schema-validated, sanitised, rate-limited, confirmation-gated for side effects and written to the SHA-256 audit trail. The only React component library with a WebMCP bridge.
+- [MCP server for assistants](https://github.com/007krcs/tekivex-ui/blob/master/docs/MCP-SERVER.md): tekivex-ui/mcp — ground-truth component catalog, props and ARIA/security checks for Claude, Cursor and other MCP clients.
+
 ## Ecosystem
 
 - [Companion packages](https://www.tekivex.com/ui/ecosystem/): The 14-package ecosystem — tekivex-ui, create-tekivex-app, tekivex-security-core, tekivex-audit, tekivex-india, tekivex-india-admin, tekivex-finance, tekivex-content, tekivex-pdf, tekivex-templates, tekivex-3d, tekivex-figma-kit, tekivex-add, tekivex-form.

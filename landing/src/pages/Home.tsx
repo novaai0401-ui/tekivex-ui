@@ -23,6 +23,7 @@
 //   2. Stats               — 6 headline numbers
 //   3. VerifyThis          — checkable claims (replaces TrustBar)
 //   4. SecurityDeepDive    — 3 primitives (scrubPII / sniffMimeType / audit)
+//   4b. AgentReady         — tekivex-ui/webmcp: agent-operable UI (4.6)
 //   5. Features            — competitor comparison table
 //   6. CodeShowcase        — quick start code samples
 //   7. DataDemo            — live DataGrid demo
@@ -41,6 +42,7 @@ import { Stats } from '../sections/Stats';
 import { ComponentShowcase } from '../sections/ComponentShowcase';
 import { VerifyThis } from '../sections/VerifyThis';
 import { SecurityDeepDive } from '../sections/SecurityDeepDive';
+import { AgentReady } from '../sections/AgentReady';
 import { Features } from '../sections/Features';
 import { DataDemo } from '../sections/DataDemo';
 import { AllComponents } from '../sections/AllComponents';
@@ -67,6 +69,10 @@ export function Home() {
       <ComponentShowcase />
       <VerifyThis />
       <SecurityDeepDive />
+      {/* 2026-10: the security story extended to the agentic web —
+          tekivex-ui/webmcp makes the UI operable by AI browser agents with
+          every call gated by SecurityCore. No competitor ships this. */}
+      <AgentReady />
       <Features />
       <CodeShowcase />
       <DataDemo />

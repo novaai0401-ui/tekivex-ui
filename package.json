@@ -1,6 +1,6 @@
 {
   "name": "tekivex-ui",
-  "version": "4.5.0",
+  "version": "4.6.0",
   "description": "Production-grade React component library — 116 components (plus 4 experimental, opt-in), WCAG 2.1 AA with WAI-ARIA APG patterns, built-in security kernel with published threat model, built-in charts, headless primitives, zero-runtime CSS engine, 44-locale i18n, Indian KYC pack, agent runtime (Anthropic/OpenAI/Gemini/Ollama/MCP/A2A), TypeScript-first.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -116,6 +116,16 @@
       "require": {
         "types": "./dist/mcp.d.cts",
         "default": "./dist/mcp.cjs"
+      }
+    },
+    "./webmcp": {
+      "import": {
+        "types": "./dist/webmcp.d.ts",
+        "default": "./dist/webmcp.js"
+      },
+      "require": {
+        "types": "./dist/webmcp.d.cts",
+        "default": "./dist/webmcp.cjs"
       }
     }
   },

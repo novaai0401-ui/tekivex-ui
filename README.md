@@ -140,6 +140,32 @@ Portal3D, Avatar3D — 14 primitives at source v0.7).
 
 ---
 
+## Built for the agentic web — `tekivex-ui/webmcp` (4.6)
+
+Your next user is an AI browser agent. Every other component library makes it
+guess what a widget does from pixels. TekiVex components **declare** it:
+
+```tsx
+import { useFormAgentTool, TkxAgentConfirm } from 'tekivex-ui/webmcp';
+
+useFormAgentTool(form, {
+  namespace: 'checkout',
+  purpose: 'Complete checkout for the current cart.',
+  fields: [{ name: 'email', description: 'Receipt email', required: true }],
+  onSubmit: async (v) => { await placeOrder(v); return 'Order placed.'; },
+});
+// → checkout.describe · checkout.fill · checkout.submit (confirmation-gated)
+```
+
+Tools are published to `navigator.modelContext` (WebMCP) when the browser has
+it, plus a frozen `window.__tekivex_agent_tools__` snapshot and an inert JSON
+manifest in `<head>` — so it works in every browser today. Every call is
+schema-validated, Unicode-sanitised, rate-limited, confirmation-gated for side
+effects (`<TkxAgentConfirm />`, fails closed) and appended to the SHA-256
+hash-chained audit trail. Reference: [docs/WEBMCP.md](./docs/WEBMCP.md).
+
+---
+
 ## Why TekiVex UI?
 
 | Feature | TekiVex UI | MUI | Ant Design | Mantine | shadcn/ui |
@@ -162,6 +188,8 @@ Portal3D, Avatar3D — 14 primitives at source v0.7).
 | i18n — 44 locales incl. RTL | ✅ | ✅ | ✅ | Partial | ❌ |
 | Plugin-extensible CSS engine | ✅ | ❌ | ❌ | ❌ | ❌ |
 | Zero runtime deps in core (recharts optional) | ✅ | ❌ | ❌ | ❌ | ✅ |
+| **Agent-operable UI** — WebMCP bridge, confirmation gates, audited calls (`tekivex-ui/webmcp`) | ✅ | ❌ | ❌ | ❌ | ❌ |
+| MCP server with compiler-extracted component catalog (`tekivex-ui/mcp`) | ✅ | ❌ | ❌ | ❌ | ❌ |
 
 ---
 

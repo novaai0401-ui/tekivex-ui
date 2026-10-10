@@ -5,6 +5,45 @@ All notable changes to TekiVex UI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.6.0] — 2026-10-10
+
+### Added — `tekivex-ui/webmcp`: the UI itself becomes operable by AI agents
+
+Browser agents are a second user of every web app now — Chrome's WebMCP early
+preview exposes `navigator.modelContext`, computer-use models drive pages
+through the accessibility tree, in-page copilots call whatever a page lets
+them. All of them guess what a widget does. This entry lets components
+**declare** it, and routes every agent call through SecurityCore.
+
+| Export | Purpose |
+|---|---|
+| `registerAgentTool` / `useAgentTool` | Declare a tool: name, description, JSON Schema, handler |
+| `useFormAgentTool(form, …)` | Expose a `TkxForm` as `<ns>.describe` / `.fill` / `.submit` — the form's own rules still run |
+| `TkxAgentConfirm` | Human-in-the-loop modal for `requiresConfirmation` tools; fails closed when absent |
+| `callAgentTool` | The single execution path the browser bridge also uses; typed error codes with suggestions |
+| `getAgentToolManifest` / `useAgentToolManifest` / `onAgentToolsChange` | Observability |
+| `validateAgentInput` / `resetAgentTools` | Test your schemas in your own suite |
+
+Discovery is published on three surfaces at once — `navigator.modelContext`
+when present, a frozen `window.__tekivex_agent_tools__`, and an inert
+`<script type="application/tekivex-agent-tools+json">` in `<head>` — so
+agents that only see a DOM dump still find the catalog, and nothing depends on
+a browser API that is still a proposal.
+
+Security gates on every call: schema validation (unknown keys rejected,
+`__proto__` stripped), `sanitizeString` + `sanitizeUnicode` on every string,
+per-tool token-bucket rate limiting (30/min default), confirmation gates for
+side effects, and an entry in the hash-chained audit log for every
+registration, call and refusal. Zero runtime dependencies.
+
+25 tests cover registration rules, every error code, both confirmation
+outcomes, unmount-denies-pending, the WebMCP host bridge against a mocked
+`navigator.modelContext`, and the form tools end to end against a real
+`TkxForm`. Reference: `docs/WEBMCP.md`; docs page at `/webmcp/`.
+
+The landing page gains a "Built for the agentic web" section and `llms.txt`
+gains an "AI agents" section so answer engines index both AI entries.
+
 ## [4.5.0] — 2026-09-01
 
 ### Changed — the MCP server is now part of `tekivex-ui`, not a separate package

@@ -6,6 +6,10 @@
 It is part of the main package — not a separate install — so the catalog can
 never drift from the components it describes.
 
+This server points *inward* — it tells an assistant about this library's
+source. Its sibling, [`tekivex-ui/webmcp`](./WEBMCP.md), points *outward*: it
+lets AI browser agents discover and safely operate the UI you build with it.
+
 ## Why it exists
 
 Assistants hallucinate props. This repository has itself shipped fixtures using

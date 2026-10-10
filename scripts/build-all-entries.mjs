@@ -37,6 +37,7 @@ const ENTRIES = [
   'experimental',
   'a11y-aria',
   'mcp',
+  'webmcp',
 ];
 
 const start = Date.now();

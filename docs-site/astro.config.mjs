@@ -171,6 +171,7 @@ export default defineConfig({
           items: [
             { label: 'Companion packages', link: '/ecosystem/' },
             { label: 'Security model', link: '/security/' },
+            { label: 'Agent-operable UI (WebMCP)', link: '/webmcp/' },
             { label: 'Accessibility', link: '/accessibility/' },
             { label: 'Honest comparison', link: '/comparison/' },
             { label: 'License', link: '/license/' },

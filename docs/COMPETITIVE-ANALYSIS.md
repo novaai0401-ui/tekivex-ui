@@ -81,7 +81,15 @@ so we never make a claim a competitor's docs page can refute.
 5. **44 built-in locales incl. RTL + Indic scripts** — behind antd's 73, ahead
    of MUI's 60 on Indic coverage, and far ahead of Mantine/shadcn (zero
    built-in strings).
-6. **Bundle discipline.** ~145 kB gz for all 116 components with real subpath
+6. **Agent-operable UI — no equivalent found (2026-10).** `tekivex-ui/webmcp`
+   lets components declare tools for AI browser agents (WebMCP
+   `navigator.modelContext` + window + DOM manifest) with schema validation,
+   Unicode sanitisation, rate limiting, human confirmation gates and the
+   hash-chained audit trail on every call. Searched MUI, antd, Mantine, Chakra,
+   shadcn, HeroUI and React Aria docs and repos for WebMCP / modelContext /
+   agent-tool registration: nothing. shadcn's CLI bundles an MCP SDK for
+   *developers*, which is the direction our `tekivex-ui/mcp` already covers.
+7. **Bundle discipline.** ~145 kB gz for all 116 components with real subpath
    entries (charts 6.2 kB, headless 0.6 kB, i18n 17.7 kB) — same class as MUI's
    153 kB for ~50 widgets, a third of antd's 452 kB.
 

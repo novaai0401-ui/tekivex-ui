@@ -41,6 +41,7 @@ const entries: Record<string, string> = {
   experimental: 'src/experimental/index.ts',
   'a11y-aria': 'src/a11y/aria/index.ts',
   mcp: 'src/mcp/index.ts',
+  webmcp: 'src/webmcp/index.ts',
 };
 
 const entry = process.env.ENTRY ?? 'index';
