@@ -1,6 +1,6 @@
 {
   "generatedFrom": "src/components/*.tsx via the TypeScript compiler API",
-  "libraryVersion": "4.5.0",
+  "libraryVersion": "4.7.0",
   "componentCount": 161,
   "components": [
     {
@@ -236,7 +236,7 @@
       "name": "TkxCode",
       "file": "TkxCode",
       "propsType": "TkxCodeProps",
-      "description": "TkxCode — zero-dependency syntax-highlighted code block for docs and",
+      "description": "TkxCode — zero-dependency syntax-highlighted code block for docs and\r",
       "rscSafe": false,
       "importPath": "tekivex-ui"
     },
@@ -1193,7 +1193,7 @@
           "name": "mask",
           "type": "boolean | undefined",
           "required": false,
-          "description": "Mask the first 8 digits at rest (when the field is not focused). While"
+          "description": "Mask the first 8 digits at rest (when the field is not focused). While\r"
         },
         {
           "name": "name",
@@ -1876,7 +1876,7 @@
           "name": "leading",
           "type": "ReactNode",
           "required": false,
-          "description": "Slot rendered at the absolute start of the bar, before the logo. Used"
+          "description": "Slot rendered at the absolute start of the bar, before the logo. Used\r"
         },
         {
           "name": "logo",
@@ -2174,13 +2174,13 @@
           "name": "redactPII",
           "type": "boolean | undefined",
           "required": false,
-          "description": "Additionally redact PII (email, cards, SSN, phone, API keys) from string"
+          "description": "Additionally redact PII (email, cards, SSN, phone, API keys) from string\r"
         },
         {
           "name": "sanitize",
           "type": "boolean | undefined",
           "required": false,
-          "description": "Run string values through the security kernel (sanitizeUnicode →"
+          "description": "Run string values through the security kernel (sanitizeUnicode →\r"
         },
         {
           "name": "style",
@@ -5900,13 +5900,13 @@
           "name": "title",
           "type": "ReactNode",
           "required": false,
-          "description": "Card title. Rendered inside `titleAs` (an `<h3>` by default)."
+          "description": "Card title. Rendered inside `titleAs` (an `<h3>` by default).\r"
         },
         {
           "name": "titleAs",
           "type": "'div' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'span' | undefined",
           "required": false,
-          "description": "Element used to wrap `title`. Defaults to `'h3'`. Use a non-heading value"
+          "description": "Element used to wrap `title`. Defaults to `'h3'`. Use a non-heading value\r"
         },
         {
           "name": "translate",
@@ -6745,7 +6745,8 @@
         {
           "name": "isIndeterminate",
           "type": "boolean | undefined",
-          "required": false
+          "required": false,
+          "description": "Renders the mixed state: sets `input.indeterminate` and `aria-checked=\"mixed\"`."
         },
         {
           "name": "isInvalid",
@@ -6826,6 +6827,12 @@
           "name": "nonce",
           "type": "string | undefined",
           "required": false
+        },
+        {
+          "name": "onChange",
+          "type": "((checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void) | undefined",
+          "required": false,
+          "description": "Fired when the checked state changes. The new checked state comes first\r"
         },
         {
           "name": "part",
@@ -9062,9 +9069,9 @@
         },
         {
           "name": "groupBy",
-          "type": "string | undefined",
+          "type": "string | string[] | undefined",
           "required": false,
-          "description": "Column key to group rows by. Group header rows render between detail\r"
+          "description": "Column key (or ordered list of column keys) to group rows by. Group\r"
         },
         {
           "name": "hasMore",
@@ -9128,7 +9135,7 @@
           "name": "onGroupToggle",
           "type": "((groupKey: string, expanded: boolean) => void) | undefined",
           "required": false,
-          "description": "Fired when a group header is toggled."
+          "description": "Fired when a group header is toggled. `groupKey` is the group's path\r"
         },
         {
           "name": "onLoadMore",
@@ -9440,7 +9447,7 @@
           "name": "column",
           "type": "number | TkxDescriptionsColumnMap | undefined",
           "required": false,
-          "description": "Number of columns per row, or a responsive map keyed by breakpoint"
+          "description": "Number of columns per row, or a responsive map keyed by breakpoint\r"
         },
         {
           "name": "contentStyle",
@@ -10137,7 +10144,7 @@
           "name": "ariaLabel",
           "type": "string | undefined",
           "required": false,
-          "description": "Accessible name for the dialog when no `title` is rendered. Falls back to"
+          "description": "Accessible name for the dialog when no `title` is rendered. Falls back to\r"
         },
         {
           "name": "closeOnEsc",
@@ -10378,7 +10385,7 @@
           "name": "children",
           "type": "ReactElement<TkxFieldChildProps, string | import(\"C:/Users/chand/OneDrive/Desktop/tekivex-ui/node_modules/@types/react/index\").JSXElementConstructor<any>> | ((field: TkxFieldChildProps) => ReactNode) | undefined",
           "required": false,
-          "description": "The control. A single element gets the field props injected via"
+          "description": "The control. A single element gets the field props injected via\r"
         },
         {
           "name": "className",
@@ -10786,7 +10793,7 @@
           "name": "form",
           "type": "FormInstance<T> | undefined",
           "required": false,
-          "description": "An external FormInstance created via useTkxForm()."
+          "description": "An external FormInstance created via useTkxForm().\r"
         },
         {
           "name": "initialValues",
@@ -11778,7 +11785,7 @@
           "name": "onTaskChange",
           "type": "((id: string, next: { start: string; end: string; }, task: GanttTask) => void) | undefined",
           "required": false,
-          "description": "Fires when a task is rescheduled via keyboard ←/→."
+          "description": "Fires when a task is rescheduled via keyboard ←/→.\r"
         },
         {
           "name": "rowHeight",
@@ -13959,7 +13966,7 @@
           "name": "unicodeSafe",
           "type": "boolean | undefined",
           "required": false,
-          "description": "Strip zero-width and bidi-override Unicode characters on input. Blocks"
+          "description": "Strip zero-width and bidi-override Unicode characters on input. Blocks\r"
         },
         {
           "name": "unselectable",
@@ -15589,11 +15596,6 @@
           "required": true
         },
         {
-          "name": "name",
-          "type": "string",
-          "required": true
-        },
-        {
           "name": "defaultValue",
           "type": "string | undefined",
           "required": false
@@ -15617,6 +15619,12 @@
           "name": "label",
           "type": "string | undefined",
           "required": false
+        },
+        {
+          "name": "name",
+          "type": "string | undefined",
+          "required": false,
+          "description": "Shared `name` for the radios. Generated with `useId()` when omitted."
         },
         {
           "name": "orientation",
@@ -28438,7 +28446,7 @@
           "name": "webOTP",
           "type": "boolean | undefined",
           "required": false,
-          "description": "Enable WebOTP API auto-fill on Android Chrome / Edge. The browser"
+          "description": "Enable WebOTP API auto-fill on Android Chrome / Edge. The browser\r"
         }
       ]
     },
@@ -28788,7 +28796,7 @@
           "name": "forbiddenTokens",
           "type": "string[] | undefined",
           "required": false,
-          "description": "Additional forbidden substrings appended to the default deny list"
+          "description": "Additional forbidden substrings appended to the default deny list\r"
         },
         {
           "name": "height",
@@ -28804,7 +28812,7 @@
           "name": "strictMode",
           "type": "boolean | undefined",
           "required": false,
-          "description": "When true, reject code containing high-risk tokens (fetch, XMLHttpRequest,"
+          "description": "When true, reject code containing high-risk tokens (fetch, XMLHttpRequest,\r"
         }
       ]
     },
@@ -34042,7 +34050,7 @@
           "name": "unicodeSafe",
           "type": "boolean | undefined",
           "required": false,
-          "description": "Strip zero-width and bidi-override Unicode on input (homograph /"
+          "description": "Strip zero-width and bidi-override Unicode on input (homograph /\r"
         },
         {
           "name": "unselectable",
@@ -34270,7 +34278,7 @@
           "name": "isolated",
           "type": "boolean | undefined",
           "required": false,
-          "description": "Use a private store scoped to this provider instead of the shared global"
+          "description": "Use a private store scoped to this provider instead of the shared global\r"
         },
         {
           "name": "position",
