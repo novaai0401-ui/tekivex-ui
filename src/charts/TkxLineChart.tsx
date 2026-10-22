@@ -12,7 +12,14 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { useTheme } from '../themes';
-import { getDefaultColors, tooltipStyle, DEFAULT_MARGIN, type ChartMargin } from './shared';
+import {
+  getDefaultColors,
+  tooltipStyle,
+  DEFAULT_MARGIN,
+  type ChartMargin,
+  type ChartDatum,
+  type ChartTickFormatter,
+} from './shared';
 
 export interface TkxLineChartSeries {
   key: string;
@@ -32,7 +39,7 @@ export interface TkxReferenceLineConfig {
 }
 
 export interface TkxLineChartProps {
-  data: Record<string, any>[];
+  data: ChartDatum[];
   series: TkxLineChartSeries[];
   xKey: string;
   height?: number;
@@ -42,8 +49,8 @@ export interface TkxLineChartProps {
   showTooltip?: boolean;
   smooth?: boolean;
   referenceLines?: TkxReferenceLineConfig[];
-  xTickFormatter?: (value: any) => string;
-  yTickFormatter?: (value: any) => string;
+  xTickFormatter?: ChartTickFormatter;
+  yTickFormatter?: ChartTickFormatter;
   yDomain?: [number | 'auto' | 'dataMin' | 'dataMax', number | 'auto' | 'dataMin' | 'dataMax'];
   connectNulls?: boolean;
   ariaLabel?: string;

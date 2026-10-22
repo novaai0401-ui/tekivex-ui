@@ -58,23 +58,25 @@ function A11yPanel({ containerRef, slug, props }: AddonContext) {
     // Debounce — wait for any prop-driven re-render to settle.
     const t = setTimeout(async () => {
       try {
-        const axe = await loadAxe();
+        const mod = await loadAxe();
+        // axe-core ships CJS typings; at runtime Vite may expose it as the namespace or under .default.
+        const axe = ((mod as any).default ?? mod) as typeof import("axe-core");
         const target = containerRef.current;
         if (!target || cancelled) return;
-        const result = await axe.default.run(target, {
+        const result = await axe.run(target, {
           rules: {
             'region': { enabled: false }, // playground content isn't a landmark page
             'page-has-heading-one': { enabled: false },
           },
         });
         if (cancelled) return;
-        const violations: AxeViolation[] = result.violations.map((v) => ({
+        const violations: AxeViolation[] = result.violations.map((v: import("axe-core").Result) => ({
           id: v.id,
           impact: v.impact ?? null,
           description: v.description,
           help: v.help,
           helpUrl: v.helpUrl,
-          nodes: v.nodes.map((n) => ({
+          nodes: v.nodes.map((n: import("axe-core").NodeResult) => ({
             html: n.html,
             target: n.target as string[],
             failureSummary: n.failureSummary,

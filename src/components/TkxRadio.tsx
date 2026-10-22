@@ -5,14 +5,12 @@ import {
   useContext,
   useId,
   useState,
-  useRef,
   forwardRef,
   type InputHTMLAttributes,
   type ReactNode,
 } from 'react';
 import { useTheme } from '../themes';
 import { sanitizeString } from '../engine/security';
-import { getAccessibleForeground } from '../engine/wcag';
 import { useReducedMotion } from '../hooks';
 import { tkx, cx } from '../engine/tkx';
 
@@ -99,15 +97,9 @@ export const TkxRadio = forwardRef<HTMLInputElement, TkxRadioProps>(
       danger: theme.css.danger,
     };
     const accentColor = schemeColor[colorScheme] ?? theme.css.primary;
-    const dotColor = getAccessibleForeground(accentColor);
 
     const outerBorder = isChecked ? accentColor : theme.css.border;
     const outerBg = theme.css.surface;
-
-    const dotAnimStyle: React.CSSProperties =
-      !reducedMotion && isChecked
-        ? { animation: 'tkx-radio-dot-in 130ms ease forwards' }
-        : {};
 
     return (
       <div

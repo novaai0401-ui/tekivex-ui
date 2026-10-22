@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 
 export type FormFieldValue = string | number | boolean | string[] | null | undefined;
 
@@ -232,7 +232,10 @@ export function useFormState<T extends Record<string, FormFieldValue>>({
   }, []);
 
   // Merge sync + async errors. Async wins when both present.
-  const errors: Partial<Record<keyof T, string>> = { ...syncErrors, ...asyncErrors };
+  const errors = useMemo<Partial<Record<keyof T, string>>>(
+    () => ({ ...syncErrors, ...asyncErrors }),
+    [syncErrors, asyncErrors],
+  );
 
   const dirty = Object.keys(values).some(
     (k) => values[k as keyof T] !== initialRef.current[k as keyof T],

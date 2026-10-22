@@ -9,7 +9,6 @@ import {
   useLayoutEffect,
   useImperativeHandle,
   type TextareaHTMLAttributes,
-  type ReactNode,
 } from 'react';
 import { useTheme } from '../themes';
 import { sanitizeString, sanitizeUnicode } from '../engine/security';

@@ -128,14 +128,19 @@ export function TkxRealTimeChart({
   const maxY = yMax !== undefined ? yMax : rawMaxY + dataRange * 0.1;
   const yRange = maxY - minY || 1;
 
-  function toSvgX(i: number): number {
-    if (points.length < 2) return chartW / 2;
-    return (i / (points.length - 1)) * chartW;
-  }
+  const pointCount = points.length;
+  const toSvgX = useCallback(
+    (i: number): number => {
+      if (pointCount < 2) return chartW / 2;
+      return (i / (pointCount - 1)) * chartW;
+    },
+    [pointCount, chartW],
+  );
 
-  function toSvgY(v: number): number {
-    return chartH - ((v - minY) / yRange) * chartH;
-  }
+  const toSvgY = useCallback(
+    (v: number): number => chartH - ((v - minY) / yRange) * chartH,
+    [chartH, minY, yRange],
+  );
 
   // Paths
   const linePath = points.length >= 2
@@ -187,7 +192,7 @@ export function TkxRealTimeChart({
       const svgY = toSvgY(pt.value) + PADDING_TOP;
       setTooltip({ x: svgX, y: svgY, point: pt });
     },
-    [points, showTooltip, PADDING_LEFT, PADDING_TOP],
+    [points, showTooltip, PADDING_LEFT, PADDING_TOP, toSvgX, toSvgY],
   );
 
   const handleMouseLeave = useCallback(() => setTooltip(null), []);

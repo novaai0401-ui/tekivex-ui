@@ -1,0 +1,21 @@
+# TkxTabs — docs
+
+`TkxTabs` switches between sibling views of the same object, such as the
+Overview / Activity / Settings of one record. Reach for it when the
+sections are peers, the user will move between them often, and only one
+needs to be visible at a time. Do not use tabs for sequential steps (use
+a stepper) or for content that should all be readable at once (use
+`TkxAccordion`). It is a compound component — `TkxTabList`, `TkxTab`,
+`TkxTabPanels`, `TkxTabPanel` — with a roving tabindex, arrow-key
+navigation and correct `aria-controls` wiring; pass `tabCount` so
+keyboard navigation knows the bounds, and use `activeIndex` + `onChange`
+to control it or `defaultIndex` to leave it uncontrolled.
+
+## Key props
+
+| Prop | Use |
+|---|---|
+| `activeIndex` / `onChange` | Controlled mode |
+| `defaultIndex` | Uncontrolled initial tab |
+| `tabCount` | Number of tabs, for keyboard wrap-around |
+| `TkxTab disabled` | Skips the tab in arrow navigation |

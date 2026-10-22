@@ -265,9 +265,7 @@ export function TkxPivotTable({
   }
 
   // ── Render ──
-  const numCols = colPaths.length * values.length + (showTotals ? values.length : 0);
   const colHeaderLevels = cols.length;
-  const valueHeaderRow = colHeaderLevels; // values labels live below the col headers
 
   const cellPad = '6px 10px';
   const headerBg = 'var(--tkx-bg-subtle, #0d0d14)';

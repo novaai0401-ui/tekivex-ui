@@ -146,7 +146,6 @@ export function TkxToolbar({
   };
 
   const getButtonStyle = (item: ToolbarItem): CSSProperties => {
-    const isToggle = item.type === 'toggle';
     const isActive = item.active;
 
     const base: CSSProperties = {
@@ -188,7 +187,7 @@ export function TkxToolbar({
         ...style,
       }}
     >
-      {items.map((item, idx) => {
+      {items.map((item) => {
         // Separator
         if (item.type === 'separator') {
           return (

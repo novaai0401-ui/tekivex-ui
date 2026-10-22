@@ -10,6 +10,10 @@ export interface InfiniteQueryOptions<T, C = unknown> {
   dedupKey?: string;
 }
 
+// `C` is not referenced by the state shape, but it is part of the exported
+// signature (mirrors InfiniteQueryOptions<T, C>) and consumers write
+// `InfiniteQueryState<Row, Cursor>`; dropping it would be a breaking change.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- public type-parameter parity
 export interface InfiniteQueryState<T, C = unknown> {
   data: T[];
   pages: T[][];

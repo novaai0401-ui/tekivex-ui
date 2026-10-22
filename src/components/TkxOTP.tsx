@@ -114,11 +114,11 @@ export function TkxOTP({
   const safeError = errorMessage ? sanitizeString(errorMessage) : undefined;
 
   // Compute success/error state colours
-  const boxBorder = (idx: number): string => {
-    if (hasError) return theme.css.danger;
-    if (isComplete) return theme.css.success;
-    return theme.css.border;
-  };
+  const boxBorder: string = hasError
+    ? theme.css.danger
+    : isComplete
+    ? theme.css.success
+    : theme.css.border;
 
   // Auto focus first input
   useEffect(() => {
@@ -144,9 +144,13 @@ export function TkxOTP({
     if (!webOTP || isDisabled) return;
     if (typeof window === 'undefined' || !('OTPCredential' in window)) return;
     const ac = new AbortController();
-    (navigator.credentials as any)
-      ?.get({ otp: { transport: ['sms'] }, signal: ac.signal })
-      .then((cred: any) => {
+    // The WebOTP `otp` request option and `OTPCredential.code` are not in lib.dom
+    // yet, so describe the slice of the API we rely on.
+    const credentials = navigator.credentials as unknown as {
+      get?: (options: { otp: { transport: string[] }; signal: AbortSignal }) => Promise<{ code?: string } | null>;
+    } | undefined;
+    credentials?.get?.({ otp: { transport: ['sms'] }, signal: ac.signal })
+      .then((cred) => {
         if (!cred?.code) return;
         const code = String(cred.code).slice(0, length);
         const next = code.split('').map((c) => filterByType(c, type));
@@ -248,8 +252,7 @@ export function TkxOTP({
         style={{ gap: sz.gap }}
       >
         {Array.from({ length }, (_, idx) => {
-          const borderCol = boxBorder(idx);
-          const isFocusedEl = typeof document !== 'undefined' && document.activeElement === inputRefs.current[idx];
+          const borderCol = boxBorder;
 
           return (
             <div key={idx} className={tkx('flex items-center')} style={{ gap: sz.gap }}>
@@ -302,7 +305,7 @@ export function TkxOTP({
                   }
                 }}
                 onBlurCapture={(e) => {
-                  (e.currentTarget as HTMLInputElement).style.borderColor = boxBorder(idx);
+                  (e.currentTarget as HTMLInputElement).style.borderColor = boxBorder;
                   (e.currentTarget as HTMLInputElement).style.boxShadow = 'none';
                 }}
               />

@@ -191,14 +191,14 @@ export function TkxCalendarHeatmap({
 
   // ── Default tooltip formatter ────────────────────────────────────────────
   const fmt = useCallback(
-    formatTooltip ??
-      ((p: { date: string; value: number }) => {
-        const d = parseDate(p.date);
-        const human = d.toLocaleDateString(undefined, {
-          weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
-        });
-        return p.value > 0 ? `${p.value} on ${human}` : `No activity on ${human}`;
-      }),
+    (p: { date: string; value: number }): string => {
+      if (formatTooltip) return formatTooltip(p);
+      const d = parseDate(p.date);
+      const human = d.toLocaleDateString(undefined, {
+        weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+      });
+      return p.value > 0 ? `${p.value} on ${human}` : `No activity on ${human}`;
+    },
     [formatTooltip],
   );
 

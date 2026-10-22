@@ -26,13 +26,17 @@ import { tkx } from '../engine/tkx';
  * Custom cell editor render contract. The editor owns its own input element
  * and signals completion via the supplied callbacks.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- public row/cell boundary; narrowing to unknown breaks consumer callbacks (v5 change)
 export interface CellEditorRenderArgs<T = any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- public row/cell boundary; narrowing to unknown breaks consumer callbacks (v5 change)
   value: any;
   row: T;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- public row/cell boundary; narrowing to unknown breaks consumer callbacks (v5 change)
   onCommit: (v: any) => void;
   onCancel: () => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- public row/cell boundary; narrowing to unknown breaks consumer callbacks (v5 change)
 export interface DataGridColumn<T = any> {
   key: string;
   header: string;
@@ -40,6 +44,7 @@ export interface DataGridColumn<T = any> {
   sortable?: boolean;
   filterable?: boolean;
   resizable?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- public row/cell boundary; narrowing to unknown breaks consumer callbacks (v5 change)
   renderCell?: (value: any, row: T) => ReactNode;
   renderHeader?: (col: DataGridColumn<T>) => ReactNode;
   align?: 'left' | 'center' | 'right';
@@ -75,6 +80,7 @@ export interface DataGridColumn<T = any> {
     | 'select'
     | ((args: CellEditorRenderArgs<T>) => ReactNode);
   editorOptions?: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- public row/cell boundary; narrowing to unknown breaks consumer callbacks (v5 change)
     options?: Array<{ value: any; label: string }>;
   };
   /**
@@ -82,6 +88,7 @@ export interface DataGridColumn<T = any> {
    * to block the commit, or `null` to accept. The error is surfaced via
    * a small inline message and `aria-describedby` on the editor.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- public row/cell boundary; narrowing to unknown breaks consumer callbacks (v5 change)
   validateCell?: (value: any, row: T) => string | null;
   /**
    * When `childRowsKey` is set on the grid, mark exactly one column with
@@ -92,6 +99,7 @@ export interface DataGridColumn<T = any> {
   tree?: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- public row/cell boundary; narrowing to unknown breaks consumer callbacks (v5 change)
 export interface TkxDataGridProps<T = any> {
   columns: DataGridColumn<T>[];
   data: T[];
@@ -136,18 +144,33 @@ export interface TkxDataGridProps<T = any> {
   /** How many pixels from the bottom to trigger onLoadMore. Default: 200 */
   loadMoreThreshold?: number;
   /**
-   * Column key to group rows by. Group header rows render between detail
-   * rows; each group is collapsible. When undefined, the grid renders
-   * exactly as without grouping (zero-cost no-op).
+   * Column key (or ordered list of column keys) to group rows by. Group
+   * header rows render between detail rows; each group is collapsible.
+   * When undefined, the grid renders exactly as without grouping
+   * (zero-cost no-op).
+   *
+   * Pass an array for multi-level grouping: rows are bucketed by the first
+   * key, each bucket is sub-grouped by the second key, and so on. Every
+   * level's header shows the group value, the number of leaf rows beneath
+   * it and the column aggregates computed over those leaf rows. Collapsing
+   * a header hides all of its descendants.
+   *
+   * Group keys (for `defaultExpandedGroups` / `onGroupToggle`) are the
+   * stringified cell value for a single `groupBy`, and for an array the
+   * path of values joined with `GROUP_KEY_SEPARATOR` — build them with
+   * `groupPathKey('EMEA', 'Sales')`.
    */
-  groupBy?: string;
+  groupBy?: string | string[];
   /**
    * Which groups start expanded. `'all'` (default) opens everything,
    * `'none'` collapses everything, or pass an explicit array of group
-   * keys.
+   * keys (path keys for multi-level grouping — see `groupPathKey`).
    */
   defaultExpandedGroups?: 'all' | 'none' | string[];
-  /** Fired when a group header is toggled. */
+  /**
+   * Fired when a group header is toggled. `groupKey` is the group's path
+   * key (see `groupBy`).
+   */
   onGroupToggle?: (groupKey: string, expanded: boolean) => void;
   /**
    * Fired when a cell edit commits (after passing `validateCell`). May
@@ -156,7 +179,9 @@ export interface TkxDataGridProps<T = any> {
   onCellEdit?: (params: {
     rowId: string | number;
     columnKey: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- public row/cell boundary; narrowing to unknown breaks consumer callbacks (v5 change)
     newValue: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- public row/cell boundary; narrowing to unknown breaks consumer callbacks (v5 change)
     oldValue: any;
     row: T;
   }) => void | Promise<void>;
@@ -193,6 +218,69 @@ export interface TkxDataGridProps<T = any> {
   onRowExpand?: (rowId: string | number, expanded: boolean) => void;
   /** Pixels of indent per depth level for tree-data rows. Default: 24 */
   indentSize?: number;
+}
+
+// ── Group path keys ───────────────────────────────────────────────────────────
+
+/**
+ * Separator between path segments of a multi-level group key. The ASCII
+ * "unit separator" control character (U+001F) is used because it cannot
+ * appear in ordinary cell values, so a value containing `/`, `|`, `.` or
+ * any other printable character never collides with a nested path.
+ */
+export const GROUP_KEY_SEPARATOR = '\u001F';
+
+/**
+ * Build the key of a (possibly nested) group from its path of values, in
+ * `groupBy` order: `groupPathKey('EMEA', 'Sales')`. Non-string values are
+ * stringified the same way the grid does (`null`/`undefined` → `''`).
+ */
+export function groupPathKey(...values: unknown[]): string {
+  return values.map(v => String(v ?? '')).join(GROUP_KEY_SEPARATOR);
+}
+
+/** A node of the group tree built by `groupBy`. */
+interface GroupNode<T> {
+  /** Path key: the stringified values from the root to this node. */
+  key: string;
+  /** This node's own (stringified) group value. */
+  value: string;
+  /** 0-based nesting depth. */
+  level: number;
+  /** Every leaf row beneath this node (aggregates run over these). */
+  rows: T[];
+  /** Sub-groups; empty at the deepest level. */
+  children: GroupNode<T>[];
+}
+
+function buildGroupTree<T>(
+  rows: T[],
+  keys: string[],
+  level: number,
+  parentKey: string | null,
+): GroupNode<T>[] {
+  const colKey = keys[level];
+  const buckets = new Map<string, T[]>();
+  for (const row of rows) {
+    const raw = (row as Record<string, unknown>)[colKey];
+    const v = String(raw ?? '');
+    const arr = buckets.get(v);
+    if (arr) arr.push(row);
+    else buckets.set(v, [row]);
+  }
+  const out: GroupNode<T>[] = [];
+  for (const [value, bucket] of buckets) {
+    const key = parentKey === null ? value : parentKey + GROUP_KEY_SEPARATOR + value;
+    out.push({
+      key,
+      value,
+      level,
+      rows: bucket,
+      children:
+        level + 1 < keys.length ? buildGroupTree(bucket, keys, level + 1, key) : [],
+    });
+  }
+  return out;
 }
 
 // ── Sort icon ─────────────────────────────────────────────────────────────────
@@ -734,6 +822,7 @@ function CellEditor<T>({
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- public row/cell boundary; narrowing to unknown breaks consumer callbacks (v5 change)
 export function TkxDataGrid<T = any>({
   columns = [],
   data = [],
@@ -836,33 +925,40 @@ export function TkxDataGrid<T = any>({
   // ── Grouping ────────────────────────────────────────────────────────────
   // Validate `groupBy` once and warn if it doesn't match any column. Treat
   // an unknown key as ungrouped so the grid keeps rendering.
-  const validGroupBy = useMemo<string | undefined>(() => {
+  // Normalised to an ordered list of column keys (one entry for the
+  // single-string form). `undefined` means ungrouped.
+  const groupByList = useMemo<string[] | undefined>(() => {
     if (!groupBy) return undefined;
-    const exists = columns.some(c => c.key === groupBy);
-    if (!exists) {
+    if (Array.isArray(groupBy)) {
+      const keys = groupBy.filter(k => typeof k === 'string' && k !== '');
+      return keys.length ? keys : undefined;
+    }
+    return [groupBy];
+  }, [groupBy]);
+  // Stable identity across renders when the caller passes an inline array.
+  const groupByJoined = groupByList ? groupByList.join(GROUP_KEY_SEPARATOR) : undefined;
+
+  const validGroupBy = useMemo<string[] | undefined>(() => {
+    if (!groupByList) return undefined;
+    const missing = groupByList.filter(k => !columns.some(c => c.key === k));
+    if (missing.length) {
       // eslint-disable-next-line no-console
       console.warn(
-        `[TkxDataGrid] groupBy="${groupBy}" does not match any column key — rendering ungrouped.`,
+        `[TkxDataGrid] groupBy="${missing.join('", "')}" does not match any column key — rendering ungrouped.`,
       );
       return undefined;
     }
-    return groupBy;
-  }, [groupBy, columns]);
+    return groupByList;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupByJoined, columns]);
+  const groupDepth = validGroupBy?.length ?? 0;
 
   // Buckets are built off the filtered+sorted set so sort order is
-  // preserved within each group. Map insertion order also preserves the
-  // order groups first appear in the sorted list.
-  const groups = useMemo<Array<{ key: string; rows: T[] }>>(() => {
+  // preserved within each (leaf) group. Map insertion order also preserves
+  // the order groups first appear in the sorted list, at every level.
+  const groups = useMemo<GroupNode<T>[]>(() => {
     if (!validGroupBy) return [];
-    const buckets = new Map<string, T[]>();
-    for (const row of filteredData) {
-      const raw = (row as Record<string, unknown>)[validGroupBy];
-      const k = String(raw ?? '');
-      const arr = buckets.get(k);
-      if (arr) arr.push(row);
-      else buckets.set(k, [row]);
-    }
-    return Array.from(buckets.entries()).map(([key, rows]) => ({ key, rows }));
+    return buildGroupTree(filteredData, validGroupBy, 0, null);
   }, [filteredData, validGroupBy]);
 
   // Expansion state. Initialised from `defaultExpandedGroups` on first
@@ -883,13 +979,17 @@ export function TkxDataGrid<T = any>({
     let dirty = false;
     setExpanded(prev => {
       const next = new Set(prev);
-      for (const g of groups) {
-        if (!seenGroupsRef.current.has(g.key)) {
-          seenGroupsRef.current.add(g.key);
-          next.add(g.key);
-          dirty = true;
+      const visit = (nodes: GroupNode<T>[]) => {
+        for (const g of nodes) {
+          if (!seenGroupsRef.current.has(g.key)) {
+            seenGroupsRef.current.add(g.key);
+            next.add(g.key);
+            dirty = true;
+          }
+          if (g.children.length) visit(g.children);
         }
-      }
+      };
+      visit(groups);
       return dirty ? next : prev;
     });
   }, [groups, validGroupBy, defaultExpandedGroups]);
@@ -908,23 +1008,27 @@ export function TkxDataGrid<T = any>({
     [onGroupToggle],
   );
 
-  // Flatten groups into a render plan: a single list of "row items" that
-  // is either a group header or a detail row. Detail rows from collapsed
-  // groups are skipped entirely.
+  // Flatten the group tree into a render plan: a single list of "row
+  // items" that is either a group header (at some level) or a detail row.
+  // Everything beneath a collapsed header — sub-group headers and detail
+  // rows alike — is skipped entirely.
   type RowItem =
-    | { type: 'group'; key: string; rows: T[] }
-    | { type: 'row'; row: T };
+    | { type: 'group'; key: string; value: string; level: number; rows: T[] }
+    | { type: 'row'; row: T; groupKey: string };
   const rowItems = useMemo<RowItem[]>(() => {
     if (!validGroupBy) {
-      return filteredData.map(row => ({ type: 'row' as const, row }));
+      return filteredData.map(row => ({ type: 'row' as const, row, groupKey: '' }));
     }
     const items: RowItem[] = [];
-    for (const g of groups) {
-      items.push({ type: 'group', key: g.key, rows: g.rows });
-      if (expanded.has(g.key)) {
-        for (const row of g.rows) items.push({ type: 'row', row });
+    const walk = (nodes: GroupNode<T>[]) => {
+      for (const g of nodes) {
+        items.push({ type: 'group', key: g.key, value: g.value, level: g.level, rows: g.rows });
+        if (!expanded.has(g.key)) continue;
+        if (g.children.length) walk(g.children);
+        else for (const row of g.rows) items.push({ type: 'row', row, groupKey: g.key });
       }
-    }
+    };
+    walk(groups);
     return items;
   }, [validGroupBy, filteredData, groups, expanded]);
 
@@ -1130,19 +1234,27 @@ export function TkxDataGrid<T = any>({
   // pages, so this is derived from `pagedItems` rather than from group.rows.
   // The index is the position in `pagedItems`, which is exactly the `i` the
   // render loop below uses to build each row's id — so the two can't drift.
+  //
+  // With multi-level grouping a header controls every rendered descendant:
+  // nested sub-group headers (`-grouphdr-i`) and detail rows (`-grouprow-i`).
+  // A stack of open ancestors (one per level) receives each id.
   const groupRowDomIds = useMemo<Map<string, string[]>>(() => {
     const map = new Map<string, string[]>();
     if (!validGroupBy) return map;
-    let current: string[] | null = null;
+    const stack: Array<{ level: number; ids: string[] }> = [];
     for (let i = 0; i < pagedItems.length; i++) {
       const item = pagedItems[i];
       if (item.type === 'group') {
-        current = [];
-        map.set(item.key, current);
-      } else if (current) {
+        while (stack.length && stack[stack.length - 1].level >= item.level) stack.pop();
+        const headerId = `${gridId}-grouphdr-${i}`;
+        for (const anc of stack) anc.ids.push(headerId);
+        const ids: string[] = [];
+        map.set(item.key, ids);
+        stack.push({ level: item.level, ids });
+      } else {
         // Detail rows before the first group header on this page belong to a
         // group whose header is on the previous page — nothing to attach to.
-        current.push(`${gridId}-grouprow-${i}`);
+        for (const anc of stack) anc.ids.push(`${gridId}-grouprow-${i}`);
       }
     }
     return map;
@@ -1188,7 +1300,6 @@ export function TkxDataGrid<T = any>({
   }, [isVirtual]);
 
   const virtualSource = isTreeMode ? pagedTreeRows : pagedData;
-  const totalHeight = virtualSource.length * rowHeight;
   const startIndex = isVirtual
     ? Math.max(0, Math.floor(scrollTop / rowHeight) - OVERSCAN)
     : 0;
@@ -1232,7 +1343,6 @@ export function TkxDataGrid<T = any>({
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onLoadMore, hasMore, loadMoreThreshold]);
 
   // ── Selection logic ─────────────────────────────────────────────────────
@@ -1766,6 +1876,12 @@ export function TkxDataGrid<T = any>({
       const treeRowId = tr.getAttribute('data-row-id');
       const expandedAttr = tr.getAttribute('aria-expanded');
       const isTreeCell = cell.hasAttribute('data-tree-cell');
+      // Group header rows (any nesting level): the disclosure cell carries
+      // aria-expanded; ArrowRight/ArrowLeft expand/collapse the group.
+      const groupHeaderKey = tr.hasAttribute('data-group-row')
+        ? tr.getAttribute('data-group-key')
+        : null;
+      const groupExpandedAttr = cell.getAttribute('aria-expanded');
 
       // Absolute row coordinates: in virtual mode the DOM only holds a
       // window of the logical row list, so vertical navigation targets the
@@ -1781,6 +1897,10 @@ export function TkxDataGrid<T = any>({
             toggleRowExpand(treeRowId);
             return;
           }
+          if (groupHeaderKey !== null && groupExpandedAttr === 'false') {
+            toggleGroup(groupHeaderKey);
+            return;
+          }
           focusCell(cells[Math.min(colIdx + 1, cells.length - 1)]);
           return;
         }
@@ -1789,6 +1909,10 @@ export function TkxDataGrid<T = any>({
           // Treegrid: collapse an expanded parent row before moving left.
           if (isTreeMode && isTreeCell && treeRowId && expandedAttr === 'true') {
             toggleRowExpand(treeRowId);
+            return;
+          }
+          if (groupHeaderKey !== null && groupExpandedAttr === 'true') {
+            toggleGroup(groupHeaderKey);
             return;
           }
           focusCell(cells[Math.max(colIdx - 1, 0)]);
@@ -1847,6 +1971,7 @@ export function TkxDataGrid<T = any>({
     [
       isTreeMode,
       toggleRowExpand,
+      toggleGroup,
       getNavigableRows,
       getNavigableCells,
       focusCell,
@@ -2315,12 +2440,16 @@ export function TkxDataGrid<T = any>({
                     if (item.type === 'group') {
                       const isExpanded = expanded.has(item.key);
                       const controlledRowIds = groupRowDomIds.get(item.key) ?? [];
+                      const groupIndent = item.level * indentSize;
                       return (
                         <tr
                           key={`group:${item.key}`}
+                          id={`${gridId}-grouphdr-${i}`}
                           role="row"
+                          aria-level={item.level + 1}
                           data-group-row=""
                           data-group-key={item.key}
+                          data-group-level={item.level}
                           tabIndex={0}
                           onClick={() => toggleGroup(item.key)}
                           onKeyDown={e => {
@@ -2386,8 +2515,14 @@ export function TkxDataGrid<T = any>({
                               >
                                 {isFirstCol ? (
                                   <span>
+                                    {groupIndent > 0 && (
+                                      <span
+                                        aria-hidden="true"
+                                        style={{ display: 'inline-block', width: groupIndent, flexShrink: 0 }}
+                                      />
+                                    )}
                                     <GroupCaret expanded={isExpanded} />
-                                    {sanitizeString(item.key) || '(empty)'}
+                                    {sanitizeString(item.value) || '(empty)'}
                                     <span
                                       style={{
                                         marginLeft: 8,
@@ -2398,7 +2533,7 @@ export function TkxDataGrid<T = any>({
                                     >
                                       ({item.rows.length} row{item.rows.length !== 1 ? 's' : ''})
                                     </span>
-                                    {aggValue !== undefined && col.key !== validGroupBy && (
+                                    {aggValue !== undefined && !validGroupBy.includes(col.key) && (
                                       <span
                                         style={{
                                           marginLeft: 12,
@@ -2441,8 +2576,9 @@ export function TkxDataGrid<T = any>({
                         id={`${gridId}-grouprow-${i}`}
                         role="row"
                         aria-rowindex={rowIndex + 1}
+                        aria-level={groupDepth + 1}
                         aria-selected={selectable ? isSelected : undefined}
-                        data-group-key={String((row as Record<string, unknown>)[validGroupBy] ?? '')}
+                        data-group-key={item.groupKey}
                         onClick={onRowClick ? () => onRowClick(row) : undefined}
                         onKeyDown={onRowClick ? e => {
                           if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onRowClick(row); }

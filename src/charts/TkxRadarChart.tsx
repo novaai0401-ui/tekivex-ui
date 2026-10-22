@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from 'recharts';
 import { useTheme } from '../themes';
-import { getDefaultColors, tooltipStyle } from './shared';
+import { getDefaultColors, tooltipStyle, type ChartDatum } from './shared';
 
 export interface TkxRadarSeries {
   key: string;
@@ -21,7 +21,7 @@ export interface TkxRadarSeries {
 }
 
 export interface TkxRadarChartProps {
-  data: Record<string, any>[];
+  data: ChartDatum[];
   series: TkxRadarSeries[];
   /** Key in data for the axis labels (e.g. 'subject', 'metric') */
   angleKey: string;

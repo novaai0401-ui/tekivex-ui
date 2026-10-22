@@ -51,6 +51,7 @@ const ENTRIES = [
   { name: 'a11y-aria', src: './src/a11y/aria/index' },
   { name: 'mcp', src: './src/mcp/index' },
   { name: 'webmcp', src: './src/webmcp/index' },
+  { name: 'tailwind', src: './src/tailwind/index' },
 ];
 
 console.log('Writing subpath type shims:');

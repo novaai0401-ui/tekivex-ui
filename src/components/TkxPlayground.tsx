@@ -28,7 +28,7 @@
 //   • Reference: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState, useCallback, useRef, useEffect, type ReactNode } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo, type ReactNode } from 'react';
 import React from 'react';
 import { useTheme } from '../themes';
 import { AmplitudeAmplifier } from '../engine/quantum-ai';
@@ -305,7 +305,6 @@ function evalCode(
     // still reachable via the global scope. A true sandbox would require an
     // iframe with a restrictive CSP (e.g., Content-Security-Policy: script-src 'none').
     // For production deployments, consider wrapping this in a sandboxed iframe.
-    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     const fn = new Function(
       'React',
       'imports',
@@ -411,7 +410,10 @@ export function TkxPlayground({
   forbiddenTokens,
 }: TkxPlaygroundProps) {
   const theme = useTheme();
-  const allExamples = [...BUILT_IN_EXAMPLES, ...(userExamples ?? [])];
+  const allExamples = useMemo(
+    () => [...BUILT_IN_EXAMPLES, ...(userExamples ?? [])],
+    [userExamples],
+  );
   const initialCode = defaultCode ?? BUILT_IN_EXAMPLES[0]!.code;
 
   const [code, setCode] = useState(initialCode);

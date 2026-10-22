@@ -44,6 +44,71 @@ const [selected, setSelected] = useState<string[]>([]);
 />
 ```
 
+## Multi-level grouping
+
+`groupBy` accepts a single column key or an ordered array of keys. With an
+array the grid builds a nested group tree — rows are bucketed by the first
+key, each bucket is sub-grouped by the second, and so on. Every level's
+header row shows the group value, the number of leaf rows beneath it, and
+each column's `aggregate` computed over **all** leaf rows under that header,
+so totals roll up correctly at every level. Collapsing a header hides all
+of its descendants (sub-group headers and detail rows alike); re-expanding
+it restores the sub-groups' own expanded/collapsed state.
+
+```tsx
+<TkxDataGrid
+  data={orders}
+  rowKey="id"
+  groupBy={['region', 'dept']}
+  defaultExpandedGroups={['EMEA', groupPathKey('EMEA', 'Sales')]}
+  onGroupToggle={(key, expanded) => console.log(key, expanded)}
+  columns={[
+    { key: 'region', header: 'Region' },
+    { key: 'dept', header: 'Dept' },
+    { key: 'name', header: 'Name' },
+    { key: 'amount', header: 'Amount', aggregate: 'sum' },
+    { key: 'margin', header: 'Margin', aggregate: 'avg' },
+  ]}
+/>
+```
+
+### Group keys
+
+Keys passed to `defaultExpandedGroups` and received by `onGroupToggle` are
+**path keys**: the stringified group values from the root down, joined with
+`GROUP_KEY_SEPARATOR` (the ASCII unit separator, `'\u001F'`). That character
+cannot appear in ordinary cell text, so values containing `/`, `|`, `.` or
+any other printable character never collide with a nested path. Build keys
+with the exported helper rather than concatenating by hand:
+
+```ts
+import { groupPathKey, GROUP_KEY_SEPARATOR } from 'tekivex-ui';
+
+groupPathKey('EMEA');           // 'EMEA'            — level 0
+groupPathKey('EMEA', 'Sales');  // 'EMEA\u001FSales' — level 1
+```
+
+A single-string `groupBy` (or a one-element array) keeps the plain,
+pre-existing keys — `'EMEA'`, not a path — so nothing changes for current
+callers.
+
+### Behaviour notes
+
+- **Sorting** applies inside each leaf group; group order follows the first
+  appearance of each value in the sorted data.
+- **Filtering** runs before grouping, so groups with no matching rows are
+  not rendered at any level.
+- **Indent**: nested headers indent by `level × indentSize` (default 24px),
+  the same prop used by tree data.
+- **Accessibility**: every header row is `role="row"` with
+  `aria-level={level + 1}`; detail rows carry `aria-level={depth + 1}`. The
+  first cell of each header is a `rowheader` exposing `aria-expanded` and an
+  `aria-controls` list of every rendered descendant row.
+- **Keyboard**: arrow keys move across nested headers and detail rows like
+  any other rows. On a header cell, `ArrowRight` expands a collapsed group,
+  `ArrowLeft` collapses an expanded one, and `Enter` / `Space` toggle.
+- `childRowsKey` (tree data) is still ignored when `groupBy` is set.
+
 ## Props
 
 | Prop | Type | Required | Description |
@@ -76,6 +141,10 @@ const [selected, setSelected] = useState<string[]>([]);
 | `hasMore` | `boolean` |  | Whether more data is available to load. When false, sentinel is hidden. |
 | `loadingMore` | `boolean` |  | Show a loading skeleton at the bottom while fetching more data. |
 | `loadMoreThreshold` | `number` |  | How many pixels from the bottom to trigger onLoadMore. Default: 200 |
+| `groupBy` | `string \| string[]` |  | Column key, or ordered list of keys for multi-level grouping. See [Multi-level grouping](#multi-level-grouping). |
+| `defaultExpandedGroups` | `'all' \| 'none' \| string[]` |  | Which groups start expanded. Default: `'all'`. Array entries are path keys (`groupPathKey`). |
+| `onGroupToggle` | `(groupKey: string, expanded: boolean) => void` |  | Fired when a group header is toggled; `groupKey` is the path key. |
+| `indentSize` | `number` |  | Pixels of indent per nesting level for tree data and nested group headers. Default: 24 |
 
 ## Accessibility
 

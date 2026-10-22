@@ -60,14 +60,91 @@ export const auroraLight: ThemeTokens = {
 // ── Theme Factory ────────────────────────────────────────────────────────────
 
 const HEX_PATTERN = /^#[0-9a-fA-F]{3,8}$/;
+const CSS_VAR_PATTERN = /^var\(\s*--[\w-]+\s*(,[\s\S]*)?\)$/;
+
+/** `true` for `#abc`, `#aabbcc`, `#aabbccdd`. */
+export function isHexColor(value: string): boolean {
+  return typeof value === 'string' && HEX_PATTERN.test(value);
+}
+
+/** `true` for `var(--anything)` / `var(--anything, fallback)` references. */
+export function isCSSVarReference(value: string): boolean {
+  return typeof value === 'string' && CSS_VAR_PATTERN.test(value.trim());
+}
+
+export const THEME_TOKEN_KEYS: readonly (keyof ThemeTokens)[] = [
+  'bg',
+  'surface',
+  'surfaceAlt',
+  'border',
+  'text',
+  'textMuted',
+  'primary',
+  'secondary',
+  'danger',
+  'warning',
+  'success',
+  'info',
+] as const;
+
+const isDev = (): boolean => {
+  try {
+    return typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production';
+  } catch {
+    return false;
+  }
+};
+
+let warnedNonHexOnce = false;
+/**
+ * The WCAG helpers can only evaluate literal hex. When a theme carries
+ * `var(--…)` references (see {@link themeFromCSSVars}) the real colour is
+ * only known to the browser at paint time, so the checks are skipped. We say
+ * so once, in dev only, so nobody assumes the contrast gate still ran.
+ */
+function warnContrastSkipped(keys: string[]): void {
+  if (warnedNonHexOnce || !isDev()) return;
+  warnedNonHexOnce = true;
+  // eslint-disable-next-line no-console
+  console.info(
+    `[TekiVex] Theme tokens ${keys.join(', ')} are CSS var() references, not hex — ` +
+      `WCAG contrast checks are skipped for them (the browser resolves the colour). ` +
+      `Use readThemeFromDOM() at runtime if you want to audit the resolved palette.`,
+  );
+}
+
+/** @internal reset the one-time dev notice (tests). */
+export function __resetThemeWarnings(): void {
+  warnedNonHexOnce = false;
+}
 
 export function createTheme(base: ThemeTokens, overrides?: Partial<ThemeTokens>): ThemeTokens {
   const theme = { ...base, ...overrides };
 
+  const nonHex: string[] = [];
   for (const [key, value] of Object.entries(theme)) {
-    if (!HEX_PATTERN.test(value)) {
-      throw new Error(`Invalid hex color for theme token '${key}': ${value}`);
+    if (isHexColor(value)) continue;
+    if (isCSSVarReference(value)) {
+      nonHex.push(key);
+      continue;
     }
+    throw new Error(`Invalid color for theme token '${key}': ${value} (expected hex or var(--…))`);
+  }
+
+  if (nonHex.length > 0) {
+    warnContrastSkipped(nonHex);
+    // Contrast can only be judged on pairs where BOTH sides are hex.
+    const hexPair = (a: keyof ThemeTokens, b: keyof ThemeTokens) =>
+      isHexColor(theme[a]) && isHexColor(theme[b]);
+    if (hexPair('text', 'bg') && !meetsAA(theme.text, theme.bg)) {
+      // eslint-disable-next-line no-console
+      console.warn(`[TekiVex] Theme contrast warning: text vs bg does not meet WCAG AA minimum (4.5:1)`);
+    }
+    if (hexPair('primary', 'bg') && !meetsAA(theme.primary, theme.bg)) {
+      // eslint-disable-next-line no-console
+      console.warn(`[TekiVex] Theme contrast warning: primary vs bg does not meet WCAG AA minimum`);
+    }
+    return theme;
   }
 
   if (!meetsAA(theme.text, theme.bg)) {
@@ -91,6 +168,135 @@ export function createTheme(base: ThemeTokens, overrides?: Partial<ThemeTokens>)
   }
 
   return theme;
+}
+
+// ── Bring your own tokens ────────────────────────────────────────────────────
+
+/**
+ * Map of TekiVex token → the CSS custom property YOUR design system already
+ * defines. Partial: anything omitted falls back to the base theme.
+ *
+ * Values may be written with or without the leading `--`.
+ */
+export type CSSVarMapping = Partial<Record<keyof ThemeTokens, string>>;
+
+export interface ThemeFromCSSVarsOptions {
+  /** Theme supplying literal fallbacks for unmapped tokens AND the `var()` fallback. Default: {@link auroraLight}. */
+  base?: ThemeTokens;
+  /**
+   * When `false`, mapped tokens become bare `var(--my-bg)` with no fallback,
+   * so a missing variable is visibly broken instead of silently falling back.
+   * Default `true`.
+   */
+  withFallback?: boolean;
+}
+
+/**
+ * Build a {@link ThemeTokens} that points at CSS custom properties you already
+ * own, instead of re-declaring your palette as hex for TekiVex.
+ *
+ * ```ts
+ * const theme = themeFromCSSVars({ bg: '--my-bg', primary: '--brand-500' });
+ * // theme.bg      === 'var(--my-bg, #f8f6f1)'
+ * // theme.primary === 'var(--brand-500, #0d7c5f)'
+ * // theme.surface === '#ffffff'   (unmapped → base theme value)
+ * <ThemeProvider theme={theme}>…</ThemeProvider>
+ * ```
+ *
+ * `ThemeProvider` then emits `--tkx-bg: var(--my-bg, #f8f6f1)` so every
+ * component follows your variable live — including your own dark-mode
+ * switch, because resolution happens in CSS.
+ */
+export function themeFromCSSVars(
+  mapping: CSSVarMapping,
+  options: ThemeFromCSSVarsOptions | ThemeTokens = {},
+): ThemeTokens {
+  // Allow the terse `themeFromCSSVars(mapping, quantumDark)` form.
+  const opts: ThemeFromCSSVarsOptions =
+    'bg' in options && typeof (options as ThemeTokens).bg === 'string'
+      ? { base: options as ThemeTokens }
+      : (options as ThemeFromCSSVarsOptions);
+  const base = opts.base ?? auroraLight;
+  const withFallback = opts.withFallback ?? true;
+
+  const out = { ...base };
+  for (const key of THEME_TOKEN_KEYS) {
+    const raw = mapping[key];
+    if (raw === undefined || raw === null || raw === '') continue;
+    let name = String(raw).trim();
+    // Accept an already-formed var() reference verbatim.
+    if (isCSSVarReference(name)) {
+      out[key] = name;
+      continue;
+    }
+    if (!name.startsWith('--')) name = `--${name}`;
+    if (!/^--[\w-]+$/.test(name)) {
+      throw new Error(`[TekiVex] themeFromCSSVars: '${raw}' is not a valid custom property name for token '${key}'`);
+    }
+    out[key] = withFallback ? `var(${name}, ${base[key]})` : `var(${name})`;
+  }
+  return out;
+}
+
+/**
+ * Resolve the `--tkx-*` custom properties to their computed values at runtime.
+ *
+ * Useful for auditing a `var()`-based theme (contrast checks need real
+ * colours), feeding canvas/WebGL code, or snapshotting what the user actually
+ * sees. Returns `null` on the server or when no token is defined on the
+ * element (e.g. no `ThemeProvider` mounted above it).
+ *
+ * Note: `getComputedStyle` returns the *declared* value of a custom property
+ * (e.g. `var(--my-bg, #fff)` stays unresolved in some engines). We retry via
+ * a probe element whose `color` is set to the variable so the browser is
+ * forced to compute an actual colour, which comes back as `rgb(…)`.
+ */
+export function readThemeFromDOM(element?: Element | null): ThemeTokens | null {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return null;
+  const el = element ?? document.documentElement;
+  if (!el || typeof window.getComputedStyle !== 'function') return null;
+
+  const styles = window.getComputedStyle(el);
+  const out: Partial<ThemeTokens> = {};
+  let found = 0;
+
+  let probe: HTMLElement | null = null;
+  const resolveViaProbe = (key: string): string => {
+    try {
+      if (!probe) {
+        probe = document.createElement('span');
+        probe.setAttribute('aria-hidden', 'true');
+        probe.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;';
+        (el as HTMLElement).appendChild?.(probe);
+      }
+      probe.style.color = `var(--tkx-${key})`;
+      const computed = window.getComputedStyle(probe).color;
+      return computed || '';
+    } catch {
+      return '';
+    }
+  };
+
+  try {
+    for (const key of THEME_TOKEN_KEYS) {
+      let value = styles.getPropertyValue(`--tkx-${key}`).trim();
+      if (!value) continue;
+      found++;
+      if (isCSSVarReference(value) || !/^(#|rgb|hsl|oklch|oklab|lab|lch|color\()/i.test(value)) {
+        const resolved = resolveViaProbe(key);
+        // jsdom (and some engines) hand back the unresolved reference; keep
+        // the declared value in that case rather than a useless `var(--tkx-x)`.
+        if (resolved && !isCSSVarReference(resolved)) value = resolved;
+      }
+      out[key] = value;
+    }
+  } finally {
+    if (probe) (probe as HTMLElement).remove();
+  }
+
+  if (found === 0) return null;
+  // Fill any missing keys from the default so the return type is total.
+  return { ...auroraLight, ...out } as ThemeTokens;
 }
 
 // ── Theme Context ────────────────────────────────────────────────────────────
@@ -259,6 +465,16 @@ export function ThemeProvider({
   // theme-specific markup, so server HTML matches the first client render
   // byte-for-byte (the next-themes pattern).
   const gated = suppressHydrationWarning && !mounted;
+
+  // Themes built with themeFromCSSVars carry var() references. They render
+  // fine (CSS resolves them), but no contrast gate could run on them; say so
+  // once in dev so it isn't mistaken for a validated palette.
+  useEffect(() => {
+    const nonHex = (Object.entries(resolved) as [string, string][])
+      .filter(([, v]) => !isHexColor(v))
+      .map(([k]) => k);
+    if (nonHex.length > 0) warnContrastSkipped(nonHex);
+  }, [resolved]);
 
   // useLayoutEffect fires synchronously after DOM mutations and before paint,
   // eliminating the flash-of-unstyled-content that useEffect causes.

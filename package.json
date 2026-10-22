@@ -127,6 +127,16 @@
         "types": "./dist/webmcp.d.cts",
         "default": "./dist/webmcp.cjs"
       }
+    },
+    "./tailwind": {
+      "import": {
+        "types": "./dist/tailwind.d.ts",
+        "default": "./dist/tailwind.js"
+      },
+      "require": {
+        "types": "./dist/tailwind.d.cts",
+        "default": "./dist/tailwind.cjs"
+      }
     }
   },
   "sideEffects": [
@@ -175,7 +185,10 @@
     "mcp:catalog": "node scripts/generate-mcp-catalog.mjs",
     "check:exports": "publint",
     "check:types": "attw --pack . --profile node16 --exclude-entrypoints styles",
-    "check:pack": "npm run check:exports && npm run check:types"
+    "check:pack": "npm run check:exports && npm run check:types",
+    "book:coverage": "node scripts/check-story-coverage.mjs",
+    "test:browser": "playwright test -c playwright.browser.config.ts",
+    "test:browser:report": "playwright show-report playwright-report/browser"
   },
   "publishConfig": {
     "access": "public"

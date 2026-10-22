@@ -29,6 +29,12 @@ export interface ChartMargin {
 
 export const DEFAULT_MARGIN: ChartMargin = { top: 10, right: 30, bottom: 10, left: 0 };
 
+/** A single row of chart data — keys are looked up by the `xKey` / series `key` props. */
+export type ChartDatum = Record<string, unknown>;
+
+/** Axis tick formatter. Recharts hands tick values straight from the data (category axes) or the computed scale (number axes). */
+export type ChartTickFormatter = (value: string | number) => string;
+
 /** Common recharts tooltip style that matches TekiVex theme */
 export function tooltipStyle(theme: ResolvedTheme) {
   return {

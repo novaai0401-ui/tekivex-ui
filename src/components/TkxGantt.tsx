@@ -119,7 +119,7 @@ export function TkxGantt({
   const selected = controlledSelected !== undefined ? controlledSelected : internalSelected;
 
   // ── Compute the timeline bounds ──
-  const { rangeStart, rangeEnd, totalDays, parsed } = useMemo(() => {
+  const { rangeStart, totalDays, parsed } = useMemo(() => {
     if (tasks.length === 0) {
       const today = parseDay(new Date());
       return { rangeStart: today, rangeEnd: addDays(today, 7), totalDays: 7, parsed: [] };

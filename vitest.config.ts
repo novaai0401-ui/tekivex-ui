@@ -20,6 +20,8 @@ export default defineConfig({
       '**/dist/**',
       // Playwright spec — runs under @playwright/test, not Vitest.
       'tests/visual/**',
+      // Real-browser a11y/keyboard suite — runs under playwright.browser.config.ts.
+      'tests/browser/**',
       // tekivex-3d is a separate workspace package with its own test
       // runner. Its component tests import `three` (a heavy peer dep) that
       // we don't install at the root to keep the dev install lean. Run them

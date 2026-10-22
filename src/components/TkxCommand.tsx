@@ -13,7 +13,7 @@ import {
 import { createPortal } from 'react-dom';
 import { useTheme } from '../themes';
 import { useLocale } from '../i18n';
-import { tkx, cx } from '../engine/tkx';
+import { cx } from '../engine/tkx';
 import { sanitizeString } from '../engine/security';
 
 // ── Inline hooks ──────────────────────────────────────────────────────────────
@@ -191,57 +191,6 @@ function HighlightedText({ text, ranges, color }: { text: string; ranges: [numbe
   return <>{parts}</>;
 }
 
-// ── Skeleton shimmer items ────────────────────────────────────────────────────
-
-function SkeletonItem({ surface, border }: { surface: string; border: string }) {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 10,
-        padding: '10px 12px',
-        borderRadius: 8,
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          width: 24,
-          height: 24,
-          borderRadius: 6,
-          background: `linear-gradient(90deg, ${border} 25%, ${surface} 50%, ${border} 75%)`,
-          backgroundSize: '200% 100%',
-          animation: 'tkx-shimmer 1.4s ease-in-out infinite',
-          flexShrink: 0,
-        }}
-      />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
-        <div
-          style={{
-            height: 13,
-            borderRadius: 4,
-            width: '60%',
-            background: `linear-gradient(90deg, ${border} 25%, ${surface} 50%, ${border} 75%)`,
-            backgroundSize: '200% 100%',
-            animation: 'tkx-shimmer 1.4s ease-in-out infinite',
-          }}
-        />
-        <div
-          style={{
-            height: 10,
-            borderRadius: 4,
-            width: '40%',
-            background: `linear-gradient(90deg, ${border} 25%, ${surface} 50%, ${border} 75%)`,
-            backgroundSize: '200% 100%',
-            animation: 'tkx-shimmer 1.4s ease-in-out 0.2s infinite',
-          }}
-        />
-      </div>
-    </div>
-  );
-}
-
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function TkxCommand({
@@ -260,7 +209,6 @@ export function TkxCommand({
   const resolvedPlaceholder = placeholder ?? t.commandSearch ?? 'Type a command or search…';
   const [query, setQuery] = useState('');
   const [activeIdx, setActiveIdx] = useState(0);
-  const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
@@ -332,14 +280,6 @@ export function TkxCommand({
   const safePlaceholder = sanitizeString(resolvedPlaceholder);
   const fallbackEmpty = t.noCommandsFound ?? `No results for "${sanitizeString(query)}"`;
   const safeEmptyMsg = emptyMessage ? sanitizeString(emptyMessage) : fallbackEmpty;
-
-  // Shimmer CSS injection (idempotent)
-  if (typeof document !== 'undefined' && !document.getElementById('tkx-shimmer-style')) {
-    const s = document.createElement('style');
-    s.id = 'tkx-shimmer-style';
-    s.textContent = `@keyframes tkx-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }`;
-    document.head.appendChild(s);
-  }
 
   return createPortal(
     <div
@@ -469,11 +409,7 @@ export function TkxCommand({
           aria-label="Command results"
           style={{ overflowY: 'auto', flex: 1, padding: '6px 8px' }}
         >
-          {loading ? (
-            Array.from({ length: 4 }, (_, i) => (
-              <SkeletonItem key={i} surface={theme.css.surface} border={theme.css.border} />
-            ))
-          ) : flatResults.length === 0 ? (
+          {flatResults.length === 0 ? (
             /* Empty state */
             <div
               style={{

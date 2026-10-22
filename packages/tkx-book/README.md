@@ -128,6 +128,21 @@ Copy the URL bar to share an exact view with anyone.
 | Interaction recording | Interactions addon |
 | Recruiter familiarity | CSF compat — Storybook stories work in tkx-book |
 
+## Coverage
+
+**34 stories** covering **33 / 128** `Tkx*` components (25.8%), including every one of the
+20 most-used components (Button, Input, Select, Checkbox, Radio, Toggle, Textarea, Modal,
+Drawer, Tooltip, Tabs, Accordion, Menu, Breadcrumb, Pagination, Table, DataGrid,
+DatePicker, Slider, Toast) plus Avatar, Badge, Alert, Card, Progress, Skeleton and the
+Indian-domain inputs. Six stories (Button, Input, Select, Modal, Tabs, DataGrid) ship a
+Docs tab (`stories/<slug>.mdx`).
+
+Check it from the repo root — the script fails if any TOP_20 component loses its story:
+
+```bash
+node scripts/check-story-coverage.mjs   # or: npm run book:coverage
+```
+
 ## Status
 
-**v0.2.0-preview.** 14 stories, 6 addons, ~1,500 lines of source total. Source-available; npm publish on demand.
+**v0.2.0-preview.** 34 stories, 6 addons. Source-available; npm publish on demand.

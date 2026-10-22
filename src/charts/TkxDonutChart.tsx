@@ -36,32 +36,6 @@ export interface TkxDonutChartProps {
   ariaLabel?: string;
 }
 
-function CenterLabel({
-  cx, cy, label, sublabel, theme,
-}: {
-  cx: number; cy: number;
-  label?: string; sublabel?: string;
-  theme: any;
-}) {
-  if (!label && !sublabel) return null;
-  return (
-    <>
-      {label && (
-        <text x={cx} y={cy - (sublabel ? 8 : 0)} textAnchor="middle" dominantBaseline="middle"
-          fill={theme.css.text} fontSize={22} fontWeight={700} fontFamily="inherit">
-          {label}
-        </text>
-      )}
-      {sublabel && (
-        <text x={cx} y={cy + (label ? 18 : 0)} textAnchor="middle" dominantBaseline="middle"
-          fill={theme.css.textMuted} fontSize={13} fontFamily="inherit">
-          {sublabel}
-        </text>
-      )}
-    </>
-  );
-}
-
 export function TkxDonutChart({
   data,
   height = 300,

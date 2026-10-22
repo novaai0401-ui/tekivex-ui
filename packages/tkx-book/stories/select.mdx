@@ -1,0 +1,20 @@
+# TkxSelect — docs
+
+`TkxSelect` is the listbox-style picker for choosing one or many values
+from a known set. Reach for it when there are more than five or six
+options (otherwise `TkxRadioGroup` or `TkxCheckbox` is faster to scan),
+when options need grouping, icons or descriptions, or when the user must
+be able to type to filter (`searchable`). Pass `multiple` for tag-style
+multi-select and `clearable` to let the user reset to empty. It is fully
+keyboard-operable and announces the selected option, so it is the right
+choice over a native `<select>` whenever you need custom rendering without
+giving up accessibility.
+
+## Key props
+
+| Prop | Use |
+|---|---|
+| `options` | `{ value, label, group?, disabled?, icon?, description? }[]` |
+| `value` / `onChange` | Controlled value — `string` or `string[]` when `multiple` |
+| `searchable` | Type-to-filter; use `virtualScroll` for very long lists |
+| `isInvalid` + `errorMessage` | Validation state |

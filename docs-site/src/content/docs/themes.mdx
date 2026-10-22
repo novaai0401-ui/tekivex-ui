@@ -56,6 +56,109 @@ contrast that fails WCAG AA logs a console warning.
   `mode` prop is purely additive.
 </Aside>
 
+## Bring your own tokens
+
+Already have a design system? You don't have to re-declare it as a TekiVex
+theme object. Every component paints from `var(--tkx-<token>)`, so the only
+thing TekiVex needs is a mapping from its twelve tokens to the colours you
+already own. Three ways to supply it, pick whichever fits your stack.
+
+<Tabs>
+<TabItem label="CSS variables you already have">
+
+`themeFromCSSVars` builds a `ThemeTokens` whose values are `var()` references
+to **your** custom properties. Anything you don't map falls back to a base
+theme (`auroraLight` by default — pass `quantumDark` or your own as the second
+argument).
+
+```tsx
+import { ThemeProvider, themeFromCSSVars, quantumDark } from 'tekivex-ui';
+
+const theme = themeFromCSSVars(
+  {
+    bg: '--app-canvas',
+    surface: '--app-card',
+    text: '--app-fg',
+    primary: '--brand-500',
+    danger: '--red-600',
+  },
+  quantumDark, // base for unmapped tokens + the var() fallback
+);
+// theme.primary === 'var(--brand-500, #00f5d4)'
+
+<ThemeProvider theme={theme}>{children}</ThemeProvider>
+```
+
+The provider emits `--tkx-primary: var(--brand-500, #00f5d4)`, so components
+follow your variable live — including your own dark-mode toggle, because the
+colour resolves in CSS, not in JS. Contrast checks are skipped for `var()`
+tokens (the browser is the only one who knows the real colour); a one-time
+`console.info` in development says so. To audit the resolved palette at
+runtime, call `readThemeFromDOM()` — it returns the computed `--tkx-*` values
+in the browser and `null` on the server.
+
+</TabItem>
+<TabItem label="Tailwind preset">
+
+`tekivex-ui/tailwind` ships a dependency-free preset that maps Tailwind
+utilities onto the same `--tkx-*` variables, so your markup and TekiVex
+components read from one source of truth.
+
+```js
+// tailwind.config.js  (Tailwind v3, or v4 via @config)
+import { tekivexPreset } from 'tekivex-ui/tailwind';
+
+export default {
+  presets: [tekivexPreset],
+  content: ['./src/**/*.{ts,tsx}'],
+};
+```
+
+```tsx
+<div className="bg-tkx-surface text-tkx-text border border-tkx-border rounded-tkx-lg shadow-tkx-md">
+  <TkxButton colorScheme="primary">Same palette, no glue code</TkxButton>
+</div>
+```
+
+Colours are `tkx-bg`, `tkx-surface`, `tkx-surface-alt`, `tkx-border`,
+`tkx-text`, `tkx-text-muted`, `tkx-primary`, `tkx-secondary`, `tkx-danger`,
+`tkx-warning`, `tkx-success`, `tkx-info`. Radii (`rounded-tkx-md`), shadows
+(`shadow-tkx-lg`) and z-index (`z-tkx-modal`) come from the exported
+`radii` / `shadows` / `zIndex` scales.
+
+</TabItem>
+<TabItem label="Paste generated variables">
+
+Prefer a stylesheet over a provider (or want the variables available before
+React hydrates)? Render any theme to a CSS block and paste it into your
+globals:
+
+```ts
+import { tekivexCssVariables } from 'tekivex-ui/tailwind';
+import { auroraLight, quantumDark } from 'tekivex-ui';
+
+console.log(tekivexCssVariables(auroraLight));
+console.log(tekivexCssVariables(quantumDark, { selector: 'html[data-theme="dark"]' }));
+```
+
+```css
+:root {
+  --tkx-bg: #f8f6f1;
+  --tkx-surface: #ffffff;
+  /* … all twelve tokens, plus --tkx-radius-*, --tkx-shadow-*, --tkx-z-* */
+}
+html[data-theme="dark"] {
+  --tkx-bg: #0a0a0f;
+  /* … */
+}
+```
+
+Pass `{ includeScales: false }` for colours only. Tailwind v4 users can drop
+the same block inside `@theme { … }`.
+
+</TabItem>
+</Tabs>
+
 ## Palette generator
 
 Generate a 50–900 colour scale from any hex:

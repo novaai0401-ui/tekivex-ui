@@ -225,8 +225,8 @@ TkxVoterIdInput.displayName = 'TkxVoterIdInput';
 
 // State code (2 chars) + RTO code (2 digits) + (year 4 digits) + sequence (7 digits)
 // Example: MH12 20100012345 → MH1220100012345
-// Some states use a hyphen (DL-01-...) — we accept and normalise.
-const DL_PATTERN = /^[A-Z]{2}[-\s]?[0-9]{2}[-\s]?[0-9]{4}[-\s]?[0-9]{7}$/;
+// Some states use a hyphen (DL-01-...) — we accept and normalise, so validation
+// runs on the stripped form (see isValidDrivingLicence) rather than a raw pattern.
 const DL_NORMALISED_LEN = 15;
 
 export function isValidDrivingLicence(input: string): boolean {

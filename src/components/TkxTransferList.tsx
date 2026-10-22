@@ -155,7 +155,6 @@ function ListPanel({
 
   const enabledItems = filtered.filter((i) => !i.disabled);
   const allSelected = enabledItems.length > 0 && enabledItems.every((i) => selected.has(i.value));
-  const someSelected = enabledItems.some((i) => selected.has(i.value));
 
   // Roving tabindex: keep exactly one <li> tabbable at a time so the list is
   // not a tab-trap. Track the focused option's value; default to the first.

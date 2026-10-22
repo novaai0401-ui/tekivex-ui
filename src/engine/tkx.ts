@@ -112,6 +112,7 @@ const BREAKPOINTS: Record<string, string> = {
 
 /** Dangerous CSS value patterns — any match → reject the declaration. */
 const DANGEROUS_VALUE_RE =
+  // eslint-disable-next-line no-control-regex -- matching NUL (\x00) is the point: it is a CSS-injection vector
   /javascript\s*:|vbscript\s*:|data\s*:\s*text\/html|data\s*:\s*text\/javascript|expression\s*\(|[\r\n\x00]/i;
 
 /** Dangerous CSS property names. */
@@ -214,7 +215,6 @@ function resolveColor(token: string): string {
 
 type Declarations = Record<string, string>;
 
-// eslint-disable-next-line complexity
 function resolveUtility(u: string): Declarations | null {
   // ── CSS custom property passthrough: [--my-var:value] ─────────────────────
   // Custom properties can't trigger side effects (they're just variables),

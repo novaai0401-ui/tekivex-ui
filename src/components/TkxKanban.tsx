@@ -18,7 +18,6 @@ import {
   forwardRef,
   useCallback,
   useEffect,
-  useId,
   useMemo,
   useRef,
   useState,
@@ -117,7 +116,6 @@ export const TkxKanban = forwardRef<HTMLDivElement, TkxKanbanProps>(
   ) {
     const theme = useTheme();
     const reducedMotion = useReducedMotion();
-    const baseId = useId();
     const [drag, setDrag] = useState<DragState | null>(null);
     const [announcement, setAnnouncement] = useState('');
     const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -148,7 +146,6 @@ export const TkxKanban = forwardRef<HTMLDivElement, TkxKanbanProps>(
     const handlePointerMove = useCallback(
       (e: React.PointerEvent, column: KanbanColumn, slotIndex: number) => {
         if (!drag || drag.mode !== 'pointer') return;
-        const card = e.currentTarget as HTMLElement;
         const startNode = cardRefs.current.get(drag.cardId);
         if (!startNode) return;
         const start = startNode.getBoundingClientRect();
@@ -168,11 +165,42 @@ export const TkxKanban = forwardRef<HTMLDivElement, TkxKanbanProps>(
       [drag],
     );
 
+    // ── Finalise a drop (shared by pointer + keyboard paths) ─────────────────
+    const finalizeDrop = useCallback(
+      (d: DragState) => {
+        if (
+          d.fromColumnId !== d.toColumnId ||
+          d.fromIndex !== d.toIndex
+        ) {
+          const targetCol = columns.find((c) => c.id === d.toColumnId);
+          const movedCard = columns
+            .find((c) => c.id === d.fromColumnId)
+            ?.cards[d.fromIndex];
+          onReorder({
+            cardId: d.cardId,
+            fromColumnId: d.fromColumnId,
+            fromIndex: d.fromIndex,
+            toColumnId: d.toColumnId,
+            toIndex: d.toIndex,
+          });
+          setAnnouncement(
+            movedCard && targetCol
+              ? `Moved "${movedCard.title}" to ${targetCol.title}, position ${d.toIndex + 1}`
+              : 'Card moved',
+          );
+        } else {
+          setAnnouncement('Returned to original position');
+        }
+        setDrag(null);
+      },
+      [columns, onReorder],
+    );
+
     // ── Pointer drop ─────────────────────────────────────────────────────────
     const handlePointerUp = useCallback(() => {
       if (!drag || drag.mode !== 'pointer') return;
       finalizeDrop(drag);
-    }, [drag]);
+    }, [drag, finalizeDrop]);
 
     // ── Cancel drag (Escape / pointer cancel) ────────────────────────────────
     const handleCancel = useCallback(() => {
@@ -180,33 +208,6 @@ export const TkxKanban = forwardRef<HTMLDivElement, TkxKanbanProps>(
       setAnnouncement('Drag cancelled');
       setDrag(null);
     }, [drag]);
-
-    function finalizeDrop(d: DragState) {
-      if (
-        d.fromColumnId !== d.toColumnId ||
-        d.fromIndex !== d.toIndex
-      ) {
-        const targetCol = columns.find((c) => c.id === d.toColumnId);
-        const movedCard = columns
-          .find((c) => c.id === d.fromColumnId)
-          ?.cards[d.fromIndex];
-        onReorder({
-          cardId: d.cardId,
-          fromColumnId: d.fromColumnId,
-          fromIndex: d.fromIndex,
-          toColumnId: d.toColumnId,
-          toIndex: d.toIndex,
-        });
-        setAnnouncement(
-          movedCard && targetCol
-            ? `Moved "${movedCard.title}" to ${targetCol.title}, position ${d.toIndex + 1}`
-            : 'Card moved',
-        );
-      } else {
-        setAnnouncement('Returned to original position');
-      }
-      setDrag(null);
-    }
 
     // ── Keyboard drag ────────────────────────────────────────────────────────
     const handleCardKeyDown = useCallback(
@@ -290,7 +291,7 @@ export const TkxKanban = forwardRef<HTMLDivElement, TkxKanbanProps>(
             break;
         }
       },
-      [columns, drag, handleCancel, isDragDisabled],
+      [columns, drag, finalizeDrop, handleCancel, isDragDisabled],
     );
 
     // ── Esc to cancel a pointer drag ─────────────────────────────────────────

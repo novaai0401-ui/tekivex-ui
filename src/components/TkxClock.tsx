@@ -106,7 +106,6 @@ interface AnalogFaceProps {
   textMuted: string;
   border: string;
   surface: string;
-  bg: string;
 }
 
 function AnalogFace({
@@ -121,7 +120,6 @@ function AnalogFace({
   textMuted,
   border,
   surface,
-  bg,
 }: AnalogFaceProps) {
   const cx = size / 2;
   const cy = size / 2;
@@ -362,7 +360,6 @@ interface DigitalDisplayProps {
   label?: string;
   size: number;
   primary: string;
-  text: string;
   textMuted: string;
   colonVisible: boolean;
 }
@@ -375,7 +372,6 @@ function DigitalDisplay({
   label,
   size,
   primary,
-  text,
   textMuted,
   colonVisible,
 }: DigitalDisplayProps) {
@@ -552,7 +548,6 @@ export function TkxClock({
           textMuted={theme.css.textMuted}
           border={theme.css.border}
           surface={theme.css.surface}
-          bg={theme.css.bg}
         />
       )}
 
@@ -565,7 +560,6 @@ export function TkxClock({
           label={label}
           size={sizePx}
           primary={theme.css.primary}
-          text={theme.css.text}
           textMuted={theme.css.textMuted}
           colonVisible={colonVisible}
         />
@@ -589,7 +583,6 @@ export function TkxClock({
             label={timezone2}
             size={sizePx * 0.7}
             primary={theme.css.secondary}
-            text={theme.css.text}
             textMuted={theme.css.textMuted}
             colonVisible={colonVisible}
           />

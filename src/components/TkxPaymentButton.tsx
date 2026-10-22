@@ -134,11 +134,50 @@ const GLOBAL_KEY: Record<PaymentProvider, string> = {
 // nothing, looser than perfect; bad keys fail at the provider anyway.
 const KEY_PATTERN = /^[A-Za-z0-9_-]{20,200}$/;
 
+// ── Minimal shapes of the provider globals we touch ──────────────────────────
+// The vendor SDKs are loaded at runtime from their CDNs, so we don't depend on
+// their type packages; these describe only the members this component calls.
+
+interface RazorpaySuccessResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id?: string;
+  razorpay_signature?: string;
+}
+
+interface RazorpayFailureResponse {
+  error?: { code?: string; description?: string };
+}
+
+interface RazorpayInstance {
+  on: (event: 'payment.failed', handler: (resp: RazorpayFailureResponse) => void) => void;
+  open: () => void;
+}
+
+type RazorpayConstructor = new (options: Record<string, unknown>) => RazorpayInstance;
+
+interface StripeInstance {
+  redirectToCheckout: (options: { sessionId: string }) => Promise<
+    { error?: { code?: string; message?: string } } | undefined
+  >;
+}
+
+type StripeFactory = (publishableKey: string) => StripeInstance;
+
+interface PaymentGlobals {
+  Razorpay?: RazorpayConstructor;
+  Stripe?: StripeFactory;
+  Square?: unknown;
+}
+
+function paymentGlobals(): PaymentGlobals {
+  return window as unknown as PaymentGlobals;
+}
+
 const scriptPromises: Partial<Record<PaymentProvider, Promise<void>>> = {};
 
 function loadProviderScript(provider: PaymentProvider): Promise<void> {
   if (typeof window === 'undefined') return Promise.resolve();
-  if ((window as any)[GLOBAL_KEY[provider]]) return Promise.resolve();
+  if ((window as unknown as Record<string, unknown>)[GLOBAL_KEY[provider]]) return Promise.resolve();
   if (scriptPromises[provider]) return scriptPromises[provider]!;
 
   const promise = new Promise<void>((resolve, reject) => {
@@ -189,7 +228,7 @@ export const TkxPaymentButton = forwardRef<HTMLButtonElement, TkxPaymentButtonPr
         await loadProviderScript(config.provider);
 
         if (config.provider === 'razorpay') {
-          const Rzp = (window as any).Razorpay;
+          const Rzp = paymentGlobals().Razorpay;
           if (!Rzp) throw new Error('Razorpay script loaded but global missing');
           const options = {
             key: config.publicKey,
@@ -202,7 +241,7 @@ export const TkxPaymentButton = forwardRef<HTMLButtonElement, TkxPaymentButtonPr
             prefill: config.prefill,
             notes: config.notes,
             theme: { color: config.themeColor ?? theme.css.primary },
-            handler: (res: any) => {
+            handler: (res: RazorpaySuccessResponse) => {
               onSuccess({
                 provider: 'razorpay',
                 paymentId: res.razorpay_payment_id,
@@ -219,7 +258,7 @@ export const TkxPaymentButton = forwardRef<HTMLButtonElement, TkxPaymentButtonPr
             },
           };
           const instance = new Rzp(options);
-          instance.on('payment.failed', (resp: any) => {
+          instance.on('payment.failed', (resp) => {
             setBusy(false);
             onFailure?.({
               provider: 'razorpay',
@@ -233,7 +272,7 @@ export const TkxPaymentButton = forwardRef<HTMLButtonElement, TkxPaymentButtonPr
         }
 
         if (config.provider === 'stripe') {
-          const StripeFn = (window as any).Stripe;
+          const StripeFn = paymentGlobals().Stripe;
           if (!StripeFn) throw new Error('Stripe script loaded but global missing');
           const stripe = StripeFn(config.publicKey);
           const result = await stripe.redirectToCheckout({ sessionId: config.sessionId });
@@ -251,7 +290,7 @@ export const TkxPaymentButton = forwardRef<HTMLButtonElement, TkxPaymentButtonPr
         }
 
         if (config.provider === 'square') {
-          const Sq = (window as any).Square;
+          const Sq = paymentGlobals().Square;
           if (!Sq) throw new Error('Square script loaded but global missing');
           // Square's full Web Payments SDK is too large to inline here. We
           // expose a hook by emitting a custom event the consumer can pick up

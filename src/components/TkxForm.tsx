@@ -116,14 +116,6 @@ interface FormContextValue {
 
 const FormContext = createContext<FormContextValue | null>(null);
 
-function useFormContext(): FormContextValue {
-  const ctx = useContext(FormContext);
-  if (!ctx) {
-    throw new Error('TkxFormField must be used inside a <TkxForm>. Wrap your fields in a TkxForm component.');
-  }
-  return ctx;
-}
-
 // ── Validation Engine ───────────────────────────────────────────────────────
 
 interface ValidationMessages {
@@ -145,7 +137,7 @@ const DEFAULT_MESSAGES: ValidationMessages = {
 };
 
 async function runValidation(
-  value: any,
+  value: unknown,
   rules: ValidationRule[],
   messages: ValidationMessages = DEFAULT_MESSAGES,
 ): Promise<string | null> {
@@ -407,7 +399,7 @@ export function TkxForm<T extends Record<string, unknown> = Record<string, unkno
     }
 
     return { ...stateRef.current.values } as T;
-  }, []);
+  }, [validationMessages]);
 
   const resetFields = useCallback(() => {
     setState({
@@ -551,8 +543,9 @@ export function TkxFormField({
     registeredRef.current = true;
   }
 
-  // Keep meta in sync
+  // Keep meta in sync — re-register whenever the rules identity changes.
   useMemo(() => {
+    metaRef.current.rules = rules;
     ctx?.registerField(name, metaRef.current);
   }, [rules, name, ctx]);
 
@@ -568,14 +561,15 @@ export function TkxFormField({
 
   // ─── onChange handler: supports both event objects and direct values ───
   const handleChange = useCallback(
-    (eventOrValue: any) => {
-      let nextValue: any;
+    (eventOrValue: unknown) => {
+      let nextValue: unknown;
       if (
         eventOrValue !== null &&
         typeof eventOrValue === 'object' &&
         'target' in eventOrValue
       ) {
-        const target = eventOrValue.target;
+        // Synthetic/DOM change event: read the control's value (checked for checkboxes).
+        const target = (eventOrValue as { target: Partial<HTMLInputElement> }).target;
         nextValue = target.type === 'checkbox' ? target.checked : target.value;
       } else {
         nextValue = eventOrValue;

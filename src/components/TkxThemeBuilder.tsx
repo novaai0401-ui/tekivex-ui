@@ -220,7 +220,6 @@ export function TkxThemeBuilder({
     // Use setTimeout chunks to simulate progressive annealing
     const runChunk = () => {
       iteration += chunkSize;
-      const partialResult = QuantumAI.optimizeTheme(hue, isDark, iteration);
 
       // Simulate energy decreasing with some noise
       const progress = iteration / totalIterations;

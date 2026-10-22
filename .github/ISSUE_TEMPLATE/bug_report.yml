@@ -1,0 +1,55 @@
+name: Bug report
+description: Something renders, behaves, or types incorrectly
+labels: ['bug', 'needs-triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A failing test or a minimal reproduction is worth more than a screenshot. If this is a **security** issue, do not file it here; see SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: tekivex-ui version
+      placeholder: '4.6.0 (run `npm ls tekivex-ui`)'
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Area
+      options:
+        - A component (name it below)
+        - ThemeProvider / theming
+        - SecurityCore (sanitisers, CSP, audit)
+        - i18n
+        - Headless hooks / form resolvers
+        - MCP server / webmcp / agent runtime
+        - Packaging / bundler / Next.js RSC
+        - Docs or demo site
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Code, a StackBlitz link, or steps in the playground at https://www.tekivex.com/ui/playground/
+      render: tsx
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: 'React 19.2, Vite 8 / Next.js 15 app router, Chrome 130 / Safari 18, Windows 11'
+  - type: checkboxes
+    id: a11y
+    attributes:
+      label: Accessibility
+      options:
+        - label: This bug affects keyboard, screen-reader, or contrast behaviour

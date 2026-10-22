@@ -870,7 +870,6 @@ export const TkxDatePicker = forwardRef<HTMLInputElement, TkxDatePickerProps>(fu
     } else if (mode === 'multiple') {
       setInputValue(multiDates.length > 0 ? `${multiDates.length} date${multiDates.length !== 1 ? 's' : ''} selected` : '');
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate, selectedRange, multiDates, mode, locale, dateFormat]);
 
   // ── Position popup ───────────────────────────────────────────────────────────

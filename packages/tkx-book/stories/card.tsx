@@ -21,7 +21,7 @@ export const card: Story = {
         <TkxCardFooter>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <TkxButton variant="ghost">Cancel</TkxButton>
-            <TkxButton variant="primary">Save</TkxButton>
+            <TkxButton variant="solid">Save</TkxButton>
           </div>
         </TkxCardFooter>
       )}

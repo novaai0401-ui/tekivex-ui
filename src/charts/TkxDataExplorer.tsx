@@ -207,11 +207,6 @@ export function TkxDataExplorer({
     () => fields.filter((f) => types[f] === 'number'),
     [fields, types],
   );
-  const stringFields = useMemo(
-    () => fields.filter((f) => types[f] === 'string' || types[f] === 'mixed'),
-    [fields, types],
-  );
-
   // Reset axis selection when the dataset changes.
   const ingest = useCallback(
     (next: DataRecord[]) => {

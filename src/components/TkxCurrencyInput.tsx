@@ -185,7 +185,7 @@ export const TkxCurrencyInput = forwardRef<HTMLInputElement, TkxCurrencyInputPro
           caretDigitsRef.current = null;
         }
         // Strip everything except digits, minus sign (when min < 0), and a decimal separator.
-        const cleaned = raw.replace(/[^\d.,\-]/g, '');
+        const cleaned = raw.replace(/[^\d.,-]/g, '');
         // Determine which character is the decimal separator in the active locale.
         const sample = formatter.format(1.5);
         const decSep = sample.includes(',') && !sample.includes('.') ? ',' : '.';

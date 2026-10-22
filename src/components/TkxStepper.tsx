@@ -79,7 +79,6 @@ interface StepCircleProps {
   primary: string;
   danger: string;
   success: string;
-  text: string;
   textMuted: string;
   border: string;
   surface: string;
@@ -99,7 +98,6 @@ function StepCircle({
   primary,
   danger,
   success,
-  text,
   textMuted,
   border,
   surface,
@@ -342,7 +340,6 @@ export function TkxStepper({
             primary={theme.css.primary}
             danger={theme.css.danger}
             success={theme.css.success}
-            text={theme.css.text}
             textMuted={theme.css.textMuted}
             border={theme.css.border}
             surface={theme.css.surface}

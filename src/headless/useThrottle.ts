@@ -30,7 +30,7 @@ export function useThrottle<T>(value: T, interval: number): T {
 /**
  * Returns a throttled callback — executes at most once per interval.
  */
-export function useThrottledCallback<T extends (...args: any[]) => any>(
+export function useThrottledCallback<T extends (...args: never[]) => unknown>(
   fn: T,
   interval: number,
 ): (...args: Parameters<T>) => void {

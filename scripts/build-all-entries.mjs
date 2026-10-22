@@ -38,6 +38,7 @@ const ENTRIES = [
   'a11y-aria',
   'mcp',
   'webmcp',
+  'tailwind',
 ];
 
 const start = Date.now();

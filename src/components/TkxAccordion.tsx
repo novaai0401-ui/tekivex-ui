@@ -359,7 +359,6 @@ export function TkxAccordion({
       const arr = [...next];
       onChange?.(multiple ? arr : arr[0] ?? '');
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [multiple, onChange, isControlled, valueProp]
   );
 
@@ -386,7 +385,7 @@ export function TkxAccordion({
   };
 
   // Item wrapper styles
-  const getItemStyle = (idx: number, isOpen: boolean, isLast: boolean): CSSProperties => {
+  const getItemStyle = (_idx: number, _isOpen: boolean, isLast: boolean): CSSProperties => {
     if (flush) return {};
     switch (variant) {
       case 'default':
@@ -409,7 +408,6 @@ export function TkxAccordion({
       default:
         return {};
     }
-    void idx; void isOpen;
   };
 
   // Trigger hover style

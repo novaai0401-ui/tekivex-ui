@@ -103,7 +103,7 @@ export function TkxTable<T extends Record<string, unknown>>({
 
   // Guard against missing array props (e.g. mounted before data is wired).
   const columns = columns_ ?? [];
-  const data = data_ ?? [];
+  const data = useMemo(() => data_ ?? [], [data_]);
 
   // ── Sort ───────────────────────────────────────────────────────────────
   const [sortKey, setSortKey] = useState<keyof T | null>(null);
@@ -199,7 +199,6 @@ export function TkxTable<T extends Record<string, unknown>>({
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onLoadMore, hasMore]);
 
   // ── Styles ─────────────────────────────────────────────────────────────

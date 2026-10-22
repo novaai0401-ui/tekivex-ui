@@ -5,7 +5,7 @@
 
 import type { ChatOptions, Provider, StreamEvent, ToolDefinition } from '../core/Provider';
 import { fetchTransport, type Transport } from '../core/Transport';
-import type { ContentBlock, Message, StopReason } from '../core/types';
+import type { ContentBlock, StopReason } from '../core/types';
 
 export interface OllamaProviderOptions {
   endpoint?: string;

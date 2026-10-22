@@ -40,6 +40,30 @@ Per-component prop catalog. Every `export interface TkxFooProps` is parsed; unio
 
 Every designer-facing token collapses to one file in this repo. When `src/themes/index.ts` changes, regenerate; Figma never drifts from runtime.
 
+## Publishing runbook — Figma Community file
+
+The spec is in `roadmap/01-figma-kit-spec.md`; the exports above are the
+machine-readable half. Publishing the human-facing kit needs a Figma account
+with Community publishing rights and takes about one working day:
+
+1. `npm run figma:build` — regenerates `dist/tokens.figma.json` and
+   `dist/variants.json` from source (57 tokens, 108 components).
+2. In a new Figma file, import `tokens.figma.json` with the Tokens Studio
+   plugin; publish the collection as Variables with `quantumDark` and
+   `auroraLight` modes.
+3. Build the 20 components listed in the spec first, one frame per
+   union-literal value from `variants.json` (Button alone is 24 frames).
+   Name each variant exactly as the TypeScript prop and value so engineers
+   can read the frame and write the JSX.
+4. Add the four pattern pages (login, settings panel, dashboard row, filtered
+   data table) and a Changelog page mirroring `CHANGELOG.md`.
+5. Publish to Community under the `tekivex-ui` name with the npm version in
+   the title; link the Community URL from `README.md` and
+   `docs-site/src/content/docs/ecosystem.mdx`.
+
+Until step 5 is done, the README must not claim a Figma kit exists; it may
+only link these generated exports.
+
 ## License
 
 MIT

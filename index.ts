@@ -6,8 +6,8 @@
 import './src/styles/global.css';
 
 // Theme System
-export { ThemeProvider, ThemeContext, useTheme, toCSSVarTheme, usePrefersColorScheme, createTheme, quantumDark, auroraLight, generatePalette, typography, spacing, breakpoints, shadows, zIndex, radii } from './src/themes';
-export type { ThemeTokens, ResolvedTheme, ThemeProviderProps, ColorPalette, ColorScheme } from './src/themes';
+export { ThemeProvider, ThemeContext, useTheme, toCSSVarTheme, usePrefersColorScheme, createTheme, themeFromCSSVars, readThemeFromDOM, isHexColor, isCSSVarReference, THEME_TOKEN_KEYS, quantumDark, auroraLight, generatePalette, typography, spacing, breakpoints, shadows, zIndex, radii } from './src/themes';
+export type { ThemeTokens, ResolvedTheme, ThemeProviderProps, ColorPalette, ColorScheme, CSSVarMapping, ThemeFromCSSVarsOptions } from './src/themes';
 
 // Components
 export { TkxButton } from './src/components/TkxButton';

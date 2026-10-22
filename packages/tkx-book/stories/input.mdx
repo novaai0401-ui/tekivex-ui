@@ -1,0 +1,19 @@
+# TkxInput — docs
+
+`TkxInput` is the single-line text field for forms. Reach for it whenever
+you need free-form text, email, numbers or passwords with a visible
+label, optional hint, and an inline error. It sanitises zero-width and
+bidi-override characters on input by default, so pasted text cannot smuggle
+Trojan-Source payloads into your backend. Use `TkxTextarea` for multi-line
+text, `TkxSelect` when the value must come from a fixed list, and the
+domain inputs (`TkxPhoneInput`, `TkxCurrencyInput`, `TkxAadhaarInput`) when
+a format-specific mask and validator already exists.
+
+## Key props
+
+| Prop | Use |
+|---|---|
+| `label` | Required; rendered and associated via `htmlFor` |
+| `hint` | Helper text under the field |
+| `error` + `isInvalid` | Error text and `aria-invalid` |
+| `required` | Adds the required marker and `aria-required` |

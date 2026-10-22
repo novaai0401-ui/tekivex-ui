@@ -55,7 +55,7 @@ export interface TkxSortableProps<T = unknown> {
   ariaLabel?: string;
 }
 
-export const TkxSortable = forwardRef<HTMLDivElement, TkxSortableProps<any>>(
+export const TkxSortable = forwardRef<HTMLDivElement, TkxSortableProps<unknown>>(
   function TkxSortable(
     { items, onChange, renderItem, orientation = 'vertical', disabled, className, style, ariaLabel },
     ref: Ref<HTMLDivElement>,
@@ -199,4 +199,4 @@ export const TkxSortable = forwardRef<HTMLDivElement, TkxSortableProps<any>>(
   },
 ) as <T>(props: TkxSortableProps<T> & { ref?: Ref<HTMLDivElement> }) => ReactElement;
 
-(TkxSortable as any).displayName = 'TkxSortable';
+(TkxSortable as { displayName?: string }).displayName = 'TkxSortable';

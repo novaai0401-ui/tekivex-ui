@@ -35,7 +35,7 @@ export async function defaultDomFactory(): Promise<DomFactory | null> {
       const dom = new JSDOM(`<!doctype html><body>${html}</body>`);
       // The validator uses CSS.escape, which jsdom does not implement.
       const win = dom.window as unknown as { CSS?: { escape(s: string): string } };
-      if (!win.CSS) win.CSS = { escape: (s: string) => s.replace(/([^\w-])/g, '\$1') };
+      if (!win.CSS) win.CSS = { escape: (s: string) => s.replace(/([^\w-])/g, '$1') };
       const g = globalThis as unknown as { CSS?: { escape(s: string): string } };
       if (!g.CSS) g.CSS = win.CSS;
       return { body: dom.window.document.body };

@@ -5,6 +5,75 @@ All notable changes to TekiVex UI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added — real-browser accessibility matrix (Chromium, Firefox, WebKit)
+
+`npm run test:browser` runs 62 Playwright tests per browser against the demo:
+axe-core WCAG 2.1 A/AA with serious and critical impact, plus one WAI-ARIA APG
+keyboard assertion per widget, for the 20 most-used components. Results and
+the run instructions are in `docs/BROWSER-MATRIX.md`. The first run found 16
+genuine defects that jsdom could never show (portalled overlays painting with
+the wrong theme, `role="grid"` on a `<div>` wrapping a `<table>`, radio groups
+with an empty `name`, a checkbox whose `onChange` contract disagrees with its
+docs, several contrast failures). Each is a `test.fixme` with a reason, not a
+weakened assertion, and is listed in the matrix doc for fixing next.
+
+### Added — bring your own tokens: `themeFromCSSVars`, `readThemeFromDOM`, `tekivex-ui/tailwind`
+
+Point the library at CSS variables you already own instead of adopting a
+theme object; `createTheme` and `ThemeProvider` accept `var()` tokens and skip
+contrast maths on them with a single dev notice. New `tekivex-ui/tailwind`
+entry ships `tekivexPreset` (colours, radii, shadows, z-index mapped to
+`var(--tkx-*)`) and `tekivexCssVariables()` for a pasteable `:root` block.
+Docs: "Bring your own tokens" in the themes page. 10 tests.
+
+### Added — story catalog covers the top 20 components
+
+`packages/tkx-book` grew from 14 to 34 stories with controls built from the
+real prop unions, docs tabs for Button, Input, Select, Modal, Tabs and
+DataGrid, and a `npm run book:coverage` gate that fails if any TOP_20
+component loses its story. Three existing stories used invented props and were
+rewritten against the source.
+
+### Fixed — tooling and contributor surface
+
+- ESLint 9 could not load the legacy `.eslintrc.cjs`, so `npm run lint` had
+  been failing at startup; replaced with `eslint.config.js` (same rules) and
+  fixed the 127 problems it then reported across 58 files, including four
+  genuine rules-of-hooks violations in `TkxMenu` and a dropped `...rest` in
+  `TkxProgress`. Lint is zero-warnings clean again.
+- The main CI workflow only triggered on `main`, which does not exist; it now
+  runs on `master`.
+- New `CONTRIBUTING.md`, issue templates, and `docs/GOOD-FIRST-ISSUES.md`
+  with 15 scoped starter tasks.
+- `docs/audit/ACCESSIBILITY-AUDIT-RFP.md`: a send-ready RFP for a third-party
+  WCAG audit, and a Figma Community publishing runbook in
+  `packages/figma-kit/README.md`.
+
+### Added — `TkxDataGrid`: multi-level row grouping with per-level aggregates
+
+`groupBy` now accepts `string | string[]`. Passing an array builds a nested
+group tree (level 0 by the first key, level 1 within each level-0 group, …).
+Every level's header row shows the group value, its leaf-row count and each
+column's `aggregate` computed over all leaf rows beneath it, so totals roll
+up correctly at every depth. Collapsing a header hides all descendants.
+
+- Group keys for `defaultExpandedGroups` / `onGroupToggle` are **path keys**
+  joined with the new exported `GROUP_KEY_SEPARATOR` (`'\u001F'`, chosen so
+  it cannot collide with cell text); build them with the new exported
+  `groupPathKey('EMEA', 'Sales')`.
+- Nested headers indent by `level × indentSize`, carry
+  `aria-level={level + 1}` (detail rows `aria-level={depth + 1}`), and their
+  `rowheader` cell's `aria-controls` lists every rendered descendant row.
+- Keyboard: `ArrowRight` / `ArrowLeft` on a group header cell expand /
+  collapse it (at any level), alongside the existing `Enter` / `Space`.
+- Sorting applies within leaf groups; filtering removes empty groups at
+  every level; an unknown key anywhere in the array warns and renders
+  ungrouped.
+- Fully backward compatible: a single-string `groupBy` (or a one-element
+  array) keeps the same plain keys, DOM attributes and behaviour as before.
+
 ## [4.6.0] — 2026-10-10
 
 ### Added — `tekivex-ui/webmcp`: the UI itself becomes operable by AI agents

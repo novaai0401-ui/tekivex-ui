@@ -7,7 +7,6 @@ import {
   useRef,
   useEffect,
   useLayoutEffect,
-  useId,
   type ReactNode,
   type CSSProperties,
   type KeyboardEvent,
@@ -84,18 +83,6 @@ function flattenVisible(
   }
   walk(nodes, 0);
   return result;
-}
-
-function getAllIds(nodes: TreeNode[]): string[] {
-  const ids: string[] = [];
-  function walk(items: TreeNode[]) {
-    for (const item of items) {
-      ids.push(item.id);
-      if (item.children) walk(item.children);
-    }
-  }
-  walk(nodes);
-  return ids;
 }
 
 // ── Chevron icon ────────────────────────────────────────────────────────────
@@ -191,7 +178,6 @@ export function TkxTreeView({
 }: TkxTreeViewProps) {
   const theme = useTheme();
   const reducedMotion = useReducedMotion();
-  const treeId = useId();
 
   // Internal state fallbacks
   const [internalSelected, setInternalSelected] = useState<string[]>([]);
@@ -340,17 +326,6 @@ export function TkxTreeView({
       pendingFocusIdRef.current = null;
     }
   });
-
-  const findNodeById = (id: string, nodes: TreeNode[]): TreeNode | undefined => {
-    for (const n of nodes) {
-      if (n.id === id) return n;
-      if (n.children) {
-        const found = findNodeById(id, n.children);
-        if (found) return found;
-      }
-    }
-    return undefined;
-  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLElement>, index: number) => {
     const item = flatItems[index];

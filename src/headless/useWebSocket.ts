@@ -191,7 +191,6 @@ export function useWebSocket<T = unknown>(options: WebSocketOptions): WebSocketS
         }, delay);
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url, protocols, reconnect, reconnectDelay, reconnectAttempts, heartbeatInterval, heartbeatMessage, clearTimers, flushQueue]);
 
   const disconnect = useCallback(() => {

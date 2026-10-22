@@ -1,0 +1,22 @@
+# TkxDataGrid — docs
+
+`TkxDataGrid` is the heavyweight table for operational data: hundreds or
+thousands of rows that users sort, filter, select, group, page through,
+edit inline and export. Reach for it when a screen's main job is working
+a dataset — admin lists, order books, ledgers. If you only need to
+present a short, read-mostly list with sortable headers, `TkxTable` is
+lighter and simpler. Columns are declared with `DataGridColumn`, rows are
+identified by `rowKey`, and every feature is opt-in: `selectable`,
+`showFilters`, `pageSize`, `groupBy`, `virtualScroll`, `showExport`,
+`editable` on a column plus `onCellEdit`, and `childRowsKey` for tree
+data.
+
+## Key props
+
+| Prop | Use |
+|---|---|
+| `columns` / `data` / `rowKey` | Required core |
+| `selectable` + `selectedRows` / `onSelectionChange` | Row checkboxes |
+| `pageSize` | Client-side pagination; omit for one long list |
+| `groupBy` | Group rows by a column key with per-group aggregates |
+| `virtualScroll` + `rowHeight` | Render only visible rows for large data |

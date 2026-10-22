@@ -120,7 +120,6 @@ function VerticalConnector({
   color: string;
   animate: boolean;
 }) {
-  const theme = useTheme();
   return (
     <div
       className={cx(tkx('w-0.5 flex-1 min-h-[24px]'), animate ? 'tkx-draw-v' : '')}

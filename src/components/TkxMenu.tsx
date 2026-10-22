@@ -260,42 +260,6 @@ function getPanelStyle(
   };
 }
 
-// ── Menu item row styles ───────────────────────────────────────────────────────
-
-function useItemStyle(
-  theme: ReturnType<typeof useTheme>,
-  isActive: boolean,
-  isDanger: boolean,
-  isDisabled: boolean,
-): CSSProperties {
-  const baseColor = isDanger ? theme.css.danger : theme.css.text;
-  return {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '7px 14px',
-    fontSize: '14px',
-    fontFamily: 'inherit',
-    cursor: isDisabled ? 'not-allowed' : 'pointer',
-    userSelect: 'none',
-    color: isDisabled
-      ? theme.css.textMuted
-      : isActive && isDanger
-      ? theme.css.danger
-      : isActive
-      ? theme.css.text
-      : baseColor,
-    backgroundColor: isActive
-      ? isDanger
-        ? `${theme.css.danger}18`
-        : `${theme.css.primary}18`
-      : 'transparent',
-    transition: 'background-color 80ms',
-    opacity: isDisabled ? 0.5 : 1,
-    outline: 'none',
-  };
-}
-
 // ── Checkmark / radio icons ────────────────────────────────────────────────────
 
 function CheckIcon({ color }: { color: string }) {
@@ -615,13 +579,13 @@ function MenuPanel({
                 {sanitizeString(item.label)}
               </div>
             )}
-            {item.options.map((opt, optionIdx) => {
+            {item.options.map((opt) => {
               flatCounter++;
               const myFlatIdx = flatCounter;
               const isActive = myFlatIdx === activeIdx;
               const isSelected = opt.value === item.value;
               const isDisabled = !!item.disabled;
-              const itemStyle = useItemStyleStatic(theme, isActive, false, isDisabled);
+              const itemStyle = itemStyleStatic(theme, isActive, false, isDisabled);
 
               return (
                 <div
@@ -678,7 +642,7 @@ function MenuPanel({
         const myFlatIdx = flatCounter;
         const isActive = myFlatIdx === activeIdx;
         const isDisabled = !!item.disabled;
-        const itemStyle = useItemStyleStatic(theme, isActive, false, isDisabled);
+        const itemStyle = itemStyleStatic(theme, isActive, false, isDisabled);
 
         return (
           <div
@@ -725,7 +689,7 @@ function MenuPanel({
         const isActive = myFlatIdx === activeIdx;
         const isDisabled = !!item.disabled;
         const isSubmenuOpen = openSubmenuId === item.id;
-        const itemStyle = useItemStyleStatic(theme, isActive || isSubmenuOpen, false, isDisabled);
+        const itemStyle = itemStyleStatic(theme, isActive || isSubmenuOpen, false, isDisabled);
 
         return (
           <div key={item.id} style={{ position: 'relative' }}>
@@ -813,7 +777,7 @@ function MenuPanel({
       const isActive = myFlatIdx === activeIdx;
       const isDisabled = !!actionItem.disabled;
       const isDanger = !!actionItem.danger;
-      const itemStyle = useItemStyleStatic(theme, isActive, isDanger, isDisabled);
+      const itemStyle = itemStyleStatic(theme, isActive, isDanger, isDisabled);
 
       return (
         <div
@@ -917,8 +881,8 @@ function MenuPanel({
   );
 }
 
-// Static version of item style (not a hook) for use inside render functions
-function useItemStyleStatic(
+// Pure style builder (not a hook) — safe to call inside map/render callbacks.
+function itemStyleStatic(
   theme: ReturnType<typeof useTheme>,
   isActive: boolean,
   isDanger: boolean,
@@ -949,9 +913,6 @@ function useItemStyleStatic(
     outline: 'none',
   };
 }
-
-// suppress unused warning — useItemStyle is defined for external consumers
-void useItemStyle;
 
 // ── TkxMenu ────────────────────────────────────────────────────────────────────
 

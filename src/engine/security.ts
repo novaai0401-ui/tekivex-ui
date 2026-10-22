@@ -1,8 +1,6 @@
 // ── Security Shield ──────────────────────────────────────────────────────────
 // XSS prevention, CSP, prop validation, tamper-evident audit trail
 
-import { fnv1aHash } from './quantum';
-
 // ── Sync SHA-256 (FIPS 180-4) ────────────────────────────────────────────────
 // Pure-JS SHA-256 so the audit chain stays synchronous (`crypto.subtle.digest`
 // is async only). ~80 LOC, zero deps, deterministic. Used for tamper-evident
@@ -897,7 +895,7 @@ export function scrubPII(raw: unknown): string {
   for (const { re, repl } of PII_PATTERNS) {
     s = typeof repl === 'function'
       ? s.replace(re, (m: string) => { redactions++; return (repl as (m: string) => string)(m); })
-      : s.replace(re, (m: string) => { redactions++; return repl as string; });
+      : s.replace(re, () => { redactions++; return repl as string; });
   }
   if (redactions > 0) {
     emitSecurityEvent(

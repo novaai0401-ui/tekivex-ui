@@ -42,6 +42,7 @@ const entries: Record<string, string> = {
   'a11y-aria': 'src/a11y/aria/index.ts',
   mcp: 'src/mcp/index.ts',
   webmcp: 'src/webmcp/index.ts',
+  tailwind: 'src/tailwind/index.ts',
 };
 
 const entry = process.env.ENTRY ?? 'index';

@@ -12,7 +12,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../themes';
-import { useReducedMotion, useEscapeKey, useClickOutside } from '../hooks';
+import { useReducedMotion, useEscapeKey } from '../hooks';
 import { tkx } from '../engine/tkx';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -170,7 +170,6 @@ export function TkxPopover({
 
   const triggerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [position, setPosition] = useState<PopoverPosition | null>(null);
 

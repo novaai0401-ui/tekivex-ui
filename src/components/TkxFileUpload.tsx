@@ -13,7 +13,7 @@ import {
 import { useTheme } from '../themes';
 import { sanitizeString, sniffMimeType } from '../engine/security';
 import { useReducedMotion } from '../hooks';
-import { tkx, cx } from '../engine/tkx';
+import { tkx } from '../engine/tkx';
 
 export interface TkxFileUploadProps {
   accept?: string;
@@ -192,7 +192,7 @@ export function TkxFileUpload({
     newEntries.forEach((entry) => {
       if (!entry.error) simulateProgress(entry.id);
     });
-  }, [files.length, maxFiles, multiple, onChange, onError, preview, simulateProgress, validateFile]);
+  }, [files.length, maxFiles, multiple, onChange, onError, preview, simulateProgress, validateFile, verifyMagicBytes]);
 
   const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files ?? []);

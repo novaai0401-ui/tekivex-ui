@@ -22,7 +22,7 @@ export function useDebounce<T>(value: T, delay: number): T {
 /**
  * Returns a debounced callback that only fires after the delay.
  */
-export function useDebouncedCallback<T extends (...args: any[]) => any>(
+export function useDebouncedCallback<T extends (...args: never[]) => unknown>(
   fn: T,
   delay: number,
 ): (...args: Parameters<T>) => void {

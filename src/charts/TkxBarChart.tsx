@@ -9,10 +9,16 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  Cell,
 } from 'recharts';
 import { useTheme } from '../themes';
-import { getDefaultColors, tooltipStyle, DEFAULT_MARGIN, type ChartMargin } from './shared';
+import {
+  getDefaultColors,
+  tooltipStyle,
+  DEFAULT_MARGIN,
+  type ChartMargin,
+  type ChartDatum,
+  type ChartTickFormatter,
+} from './shared';
 
 export interface TkxBarChartSeries {
   key: string;
@@ -24,7 +30,7 @@ export interface TkxBarChartSeries {
 }
 
 export interface TkxBarChartProps {
-  data: Record<string, any>[];
+  data: ChartDatum[];
   series: TkxBarChartSeries[];
   xKey: string;
   height?: number;
@@ -36,8 +42,8 @@ export interface TkxBarChartProps {
   barSize?: number;
   /** Use gradient fill per series. Default: false */
   gradient?: boolean;
-  xTickFormatter?: (value: any) => string;
-  yTickFormatter?: (value: any) => string;
+  xTickFormatter?: ChartTickFormatter;
+  yTickFormatter?: ChartTickFormatter;
   ariaLabel?: string;
 }
 

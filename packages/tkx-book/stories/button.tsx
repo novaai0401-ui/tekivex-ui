@@ -5,11 +5,11 @@ export const button: Story = {
   name: 'TkxButton',
   description: 'Primary action button — variants, sizes, color schemes, loading state.',
   controls: {
-    variant: { type: 'select', options: ['primary', 'secondary', 'outline', 'ghost', 'link'], default: 'primary' },
-    size: { type: 'select', options: ['sm', 'md', 'lg'], default: 'md' },
-    colorScheme: { type: 'select', options: ['primary', 'secondary', 'success', 'warning', 'danger', 'info'], default: 'primary' },
+    variant: { type: 'select', options: ['solid', 'outline', 'ghost', 'link'], default: 'solid' },
+    size: { type: 'select', options: ['sm', 'md', 'lg', 'xl'], default: 'md' },
+    colorScheme: { type: 'select', options: ['primary', 'secondary', 'danger', 'warning', 'success'], default: 'primary' },
     label: { type: 'text', default: 'Click me' },
-    loading: { type: 'boolean', default: false },
+    isLoading: { type: 'boolean', default: false },
     disabled: { type: 'boolean', default: false },
   },
   render: (p) => (
@@ -17,7 +17,7 @@ export const button: Story = {
       variant={p.variant}
       size={p.size}
       colorScheme={p.colorScheme}
-      loading={p.loading}
+      isLoading={p.isLoading}
       disabled={p.disabled}
     >
       {p.label}

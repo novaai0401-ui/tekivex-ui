@@ -546,7 +546,8 @@ export function TkxSpreadsheet({
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   // Guard against a missing/partial `data` object (e.g. mounted before wiring).
-  const cells = data?.cells ?? {};
+  const dataCells = data?.cells;
+  const cells = useMemo(() => dataCells ?? {}, [dataCells]);
 
   // Memo a single eval context so cross-cell formulas share work.
   const computed = useMemo(() => {

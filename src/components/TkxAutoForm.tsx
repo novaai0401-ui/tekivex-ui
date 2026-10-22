@@ -22,6 +22,7 @@ import {
   useRef,
   useState,
   useCallback,
+  useMemo,
   type CSSProperties,
   type FormEvent,
   type ReactNode,
@@ -84,7 +85,8 @@ export function TkxAutoForm({
   const theme = useTheme();
   // Tolerate a missing/partial schema (e.g. data still loading): treat it as an
   // empty form rather than crashing on `schema.fields`.
-  const fields = schema?.fields ?? [];
+  const schemaFields = schema?.fields;
+  const fields = useMemo(() => schemaFields ?? [], [schemaFields]);
   const [values, setValues] = useState<Record<string, unknown>>(() => ({ ...defaultValues }));
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [showSummary, setShowSummary] = useState(false);

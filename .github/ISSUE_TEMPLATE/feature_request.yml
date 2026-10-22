@@ -1,0 +1,28 @@
+name: Feature request
+description: A new component, prop, or capability
+labels: ['enhancement', 'needs-triage']
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to build, and what stops you today?
+      description: Describe the outcome, not the API. The roadmap in docs/ROADMAP.md commits to outcomes.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API (optional)
+      render: tsx
+  - type: textarea
+    id: prior
+    attributes:
+      label: How do MUI / Ant Design / Mantine / shadcn solve this?
+      description: Links help us keep parity claims honest (see docs/COMPETITIVE-ANALYSIS.md).
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This needs no new runtime dependency in core
+        - label: I am willing to open a PR for this

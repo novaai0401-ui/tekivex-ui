@@ -46,6 +46,7 @@ export const TkxProgress = forwardRef<HTMLDivElement, TkxProgressProps>(
 
       return (
         <div
+          {...rest}
           ref={ref}
           role="progressbar"
           aria-valuemin={0}
@@ -78,6 +79,7 @@ export const TkxProgress = forwardRef<HTMLDivElement, TkxProgressProps>(
     const h = LINEAR_H[size];
     return (
       <div
+        {...rest}
         ref={ref}
         role="progressbar"
         aria-valuemin={0}

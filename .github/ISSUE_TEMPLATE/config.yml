@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/007krcs/tekivex-ui/blob/master/SECURITY.md
+    about: Private disclosure process. Never file a vulnerability as a public issue.
+  - name: Good first issues
+    url: https://github.com/007krcs/tekivex-ui/blob/master/docs/GOOD-FIRST-ISSUES.md
+    about: Self-contained starter tasks with the file, acceptance test, and effort estimate.
+  - name: Questions and usage help
+    url: https://github.com/007krcs/tekivex-ui/discussions
+    about: Ask in Discussions; issues are for bugs and features.

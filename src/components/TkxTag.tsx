@@ -107,7 +107,6 @@ export function TkxTag({
   onClick,
   ...rest
 }: TkxTagProps) {
-  const theme = useTheme();
   const reducedMotion = useReducedMotion();
   const colors = useTagColors(colorScheme, variant);
   const safeLabel = typeof children === 'string' ? sanitizeString(children) : children;

@@ -126,7 +126,6 @@ export function TkxTitle({
   style,
 }: TkxTitleProps) {
   const color = useTypeColor(type);
-  const theme = useTheme();
   const sizeConfig = TITLE_SIZES[level];
   const tag = `h${level}` as keyof React.JSX.IntrinsicElements;
 

@@ -153,7 +153,6 @@ export function useVariableVirtualList(
     return keys;
     // itemCount + getItemKey identity define the ordered id list. Consumers pass
     // a getItemKey that changes identity when the order changes (memo on data).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemCount, getItemKey]);
 
   // Fast id → index lookup for anchor restore.
@@ -282,6 +281,12 @@ export function useVariableVirtualList(
     if (!enabled) return;
     if (typeof ResizeObserver === 'undefined') return;
 
+    // Capture the Map instances now so the cleanup clears the same ones this
+    // effect populated (the refs themselves never change, but the lint rule
+    // can't see that).
+    const stagedMap = staged.current;
+    const callbackMap = measureCallbacks.current;
+
     const flush = () => {
       rafId.current = null;
       if (staged.current.size === 0) return;
@@ -327,8 +332,8 @@ export function useVariableVirtualList(
         cancelAnimationFrame(rafId.current);
       }
       rafId.current = null;
-      staged.current.clear();
-      measureCallbacks.current.clear();
+      stagedMap.clear();
+      callbackMap.clear();
     };
   }, [enabled]);
 
@@ -370,7 +375,6 @@ export function useVariableVirtualList(
       setScroll(offsets[fallbackIndex] ?? 0);
     }
     // measuredVersion + itemCount are the "prefix array changed" trigger.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [measuredVersion, itemCount, enabled, maintainVisibleContentPosition]);
 
   // ── scrollToIndex / scrollToBottom / isPinnedToBottom ──────────────────────

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, within, act } from '@testing-library/react';
-import { TkxDataGrid } from '../src/components/TkxDataGrid';
+import { TkxDataGrid, groupPathKey, GROUP_KEY_SEPARATOR } from '../src/components/TkxDataGrid';
 import { ThemeProvider } from '../src/themes';
 import { quantumDark } from '../src/themes';
 import type { DataGridColumn } from '../src/components/TkxDataGrid';
@@ -1040,6 +1040,359 @@ describe('TkxDataGrid', () => {
       const groupRow = getGroupRows()[0];
       const pinnedCell = groupRow.querySelector('td[data-pinned="left"]');
       expect(pinnedCell).not.toBeNull();
+    });
+  });
+
+  // ── Multi-level row grouping ───────────────────────────────────────────────
+
+  describe('multi-level row grouping', () => {
+    interface MRow {
+      id: string;
+      region: string;
+      dept: string;
+      team: string;
+      name: string;
+      amount: number;
+    }
+    const mData: MRow[] = [
+      { id: '1', region: 'EMEA', dept: 'Sales', team: 'North', name: 'Ann', amount: 100 },
+      { id: '2', region: 'EMEA', dept: 'Sales', team: 'South', name: 'Ben', amount: 200 },
+      { id: '3', region: 'EMEA', dept: 'Eng', team: 'Core', name: 'Cat', amount: 300 },
+      { id: '4', region: 'APAC', dept: 'Sales', team: 'North', name: 'Dan', amount: 400 },
+      { id: '5', region: 'APAC', dept: 'Eng', team: 'Core', name: 'Eve', amount: 500 },
+      { id: '6', region: 'APAC', dept: 'Eng', team: 'Infra', name: 'Fay', amount: 600 },
+    ];
+    const mCols: DataGridColumn<MRow>[] = [
+      { key: 'region', header: 'Region' },
+      { key: 'dept', header: 'Dept' },
+      { key: 'team', header: 'Team' },
+      { key: 'name', header: 'Name' },
+      { key: 'amount', header: 'Amount', aggregate: 'sum' },
+    ];
+
+    const groupRows = () =>
+      Array.from(document.querySelectorAll('[data-group-row]')) as HTMLElement[];
+    const detailRows = () =>
+      Array.from(
+        document.querySelectorAll('tr[data-group-key]:not([data-group-row])'),
+      ) as HTMLElement[];
+    const headerByKey = (key: string) =>
+      document.querySelector(`[data-group-row][data-group-key="${key}"]`) as HTMLElement | null;
+    const aggOf = (row: HTMLElement, col: string) =>
+      row.querySelector(`[data-group-agg="${col}"]`)?.textContent ?? null;
+
+    it('two-level groupBy renders level-0 and level-1 headers with leaf row counts', () => {
+      render(
+        <TkxDataGrid columns={mCols} data={mData} rowKey="id" groupBy={['region', 'dept']} />,
+        { wrapper: Wrapper },
+      );
+      const rows = groupRows();
+      // 2 regions + (EMEA: Sales, Eng) + (APAC: Sales, Eng) = 6 headers
+      expect(rows.length).toBe(6);
+      expect(rows.filter(r => r.dataset.groupLevel === '0').length).toBe(2);
+      expect(rows.filter(r => r.dataset.groupLevel === '1').length).toBe(4);
+      expect(headerByKey('EMEA')!.textContent).toContain('3 rows');
+      expect(headerByKey(groupPathKey('EMEA', 'Sales'))!.textContent).toContain('2 rows');
+      expect(headerByKey(groupPathKey('EMEA', 'Eng'))!.textContent).toContain('1 row');
+      expect(detailRows().length).toBe(6);
+    });
+
+    it('three-level groupBy nests headers in document order (parent before children)', () => {
+      render(
+        <TkxDataGrid
+          columns={mCols}
+          data={mData}
+          rowKey="id"
+          groupBy={['region', 'dept', 'team']}
+        />,
+        { wrapper: Wrapper },
+      );
+      const levels = groupRows().map(r => r.dataset.groupLevel);
+      // EMEA > Sales > North, South ; EMEA > Eng > Core ; APAC > Sales > North ; APAC > Eng > Core, Infra
+      expect(levels).toEqual(['0', '1', '2', '2', '1', '2', '0', '1', '2', '1', '2', '2']);
+      expect(headerByKey(groupPathKey('APAC', 'Eng', 'Infra'))!.textContent).toContain('Infra');
+    });
+
+    it('aggregates roll up per level over all leaf rows beneath each header', () => {
+      render(
+        <TkxDataGrid
+          columns={mCols}
+          data={mData}
+          rowKey="id"
+          groupBy={['region', 'dept', 'team']}
+        />,
+        { wrapper: Wrapper },
+      );
+      expect(aggOf(headerByKey('EMEA')!, 'amount')).toBe('600');
+      expect(aggOf(headerByKey('APAC')!, 'amount')).toBe('1500');
+      expect(aggOf(headerByKey(groupPathKey('EMEA', 'Sales'))!, 'amount')).toBe('300');
+      expect(aggOf(headerByKey(groupPathKey('APAC', 'Eng'))!, 'amount')).toBe('1100');
+      expect(aggOf(headerByKey(groupPathKey('APAC', 'Eng', 'Infra'))!, 'amount')).toBe('600');
+    });
+
+    it('collapsing a level-0 header hides all descendant headers and detail rows', () => {
+      render(
+        <TkxDataGrid columns={mCols} data={mData} rowKey="id" groupBy={['region', 'dept']} />,
+        { wrapper: Wrapper },
+      );
+      fireEvent.click(headerByKey('EMEA')!);
+      expect(headerByKey(groupPathKey('EMEA', 'Sales'))).toBeNull();
+      expect(headerByKey(groupPathKey('EMEA', 'Eng'))).toBeNull();
+      expect(detailRows().length).toBe(3); // only APAC rows remain
+      expect(groupRows().length).toBe(4); // EMEA, APAC, APAC/Sales, APAC/Eng
+      // Re-expanding brings the sub-groups back with their own prior state
+      fireEvent.click(headerByKey('EMEA')!);
+      expect(headerByKey(groupPathKey('EMEA', 'Sales'))).not.toBeNull();
+      expect(detailRows().length).toBe(6);
+    });
+
+    it('collapsing a nested header hides only its own detail rows', () => {
+      render(
+        <TkxDataGrid columns={mCols} data={mData} rowKey="id" groupBy={['region', 'dept']} />,
+        { wrapper: Wrapper },
+      );
+      fireEvent.click(headerByKey(groupPathKey('EMEA', 'Sales'))!);
+      expect(detailRows().length).toBe(4);
+      expect(screen.queryByText('Ann')).not.toBeInTheDocument();
+      expect(screen.getByText('Cat')).toBeInTheDocument();
+      expect(groupRows().length).toBe(6);
+    });
+
+    it('defaultExpandedGroups accepts path keys', () => {
+      render(
+        <TkxDataGrid
+          columns={mCols}
+          data={mData}
+          rowKey="id"
+          groupBy={['region', 'dept']}
+          defaultExpandedGroups={['APAC', groupPathKey('APAC', 'Eng')]}
+        />,
+        { wrapper: Wrapper },
+      );
+      // EMEA collapsed → no EMEA sub-headers; APAC open; APAC/Sales closed; APAC/Eng open
+      expect(headerByKey(groupPathKey('EMEA', 'Sales'))).toBeNull();
+      expect(headerByKey(groupPathKey('APAC', 'Sales'))).not.toBeNull();
+      expect(detailRows().map(r => r.textContent)).toEqual(
+        expect.arrayContaining([expect.stringContaining('Eve'), expect.stringContaining('Fay')]),
+      );
+      expect(detailRows().length).toBe(2);
+    });
+
+    it('onGroupToggle fires with the path key for nested headers', () => {
+      const onGroupToggle = vi.fn();
+      render(
+        <TkxDataGrid
+          columns={mCols}
+          data={mData}
+          rowKey="id"
+          groupBy={['region', 'dept']}
+          onGroupToggle={onGroupToggle}
+        />,
+        { wrapper: Wrapper },
+      );
+      fireEvent.click(headerByKey(groupPathKey('EMEA', 'Eng'))!);
+      expect(onGroupToggle).toHaveBeenCalledWith(groupPathKey('EMEA', 'Eng'), false);
+      fireEvent.click(headerByKey('APAC')!);
+      expect(onGroupToggle).toHaveBeenLastCalledWith('APAC', false);
+    });
+
+    it('path keys use a separator that cannot collide with "/" in values', () => {
+      const slashData: MRow[] = [
+        { id: '1', region: 'A/B', dept: 'C', team: 't', name: 'x', amount: 1 },
+        { id: '2', region: 'A', dept: 'B/C', team: 't', name: 'y', amount: 2 },
+      ];
+      render(
+        <TkxDataGrid
+          columns={mCols}
+          data={slashData}
+          rowKey="id"
+          groupBy={['region', 'dept']}
+        />,
+        { wrapper: Wrapper },
+      );
+      expect(GROUP_KEY_SEPARATOR).toBe('\u001F');
+      expect(groupPathKey('A/B', 'C')).not.toBe(groupPathKey('A', 'B/C'));
+      expect(headerByKey(groupPathKey('A/B', 'C'))).not.toBeNull();
+      expect(headerByKey(groupPathKey('A', 'B/C'))).not.toBeNull();
+    });
+
+    it('aria-level reflects nesting: headers at level+1, detail rows at depth+1', () => {
+      render(
+        <TkxDataGrid
+          columns={mCols}
+          data={mData}
+          rowKey="id"
+          groupBy={['region', 'dept', 'team']}
+        />,
+        { wrapper: Wrapper },
+      );
+      expect(headerByKey('EMEA')!.getAttribute('aria-level')).toBe('1');
+      expect(headerByKey(groupPathKey('EMEA', 'Sales'))!.getAttribute('aria-level')).toBe('2');
+      expect(
+        headerByKey(groupPathKey('EMEA', 'Sales', 'North'))!.getAttribute('aria-level'),
+      ).toBe('3');
+      expect(detailRows()[0].getAttribute('aria-level')).toBe('4');
+      // Every row in the body has role="row"
+      for (const r of [...groupRows(), ...detailRows()]) {
+        expect(r.getAttribute('role')).toBe('row');
+      }
+    });
+
+    it('nested header disclosure cell exposes aria-expanded and aria-controls over descendants', () => {
+      render(
+        <TkxDataGrid columns={mCols} data={mData} rowKey="id" groupBy={['region', 'dept']} />,
+        { wrapper: Wrapper },
+      );
+      const emea = headerByKey('EMEA')!;
+      const disclosure = emea.querySelector('[aria-expanded]')!;
+      expect(disclosure.getAttribute('aria-expanded')).toBe('true');
+      const ids = disclosure.getAttribute('aria-controls')!.trim().split(/\s+/);
+      // EMEA controls: 2 sub-headers + 3 detail rows
+      expect(ids.length).toBe(5);
+      for (const id of ids) expect(document.getElementById(id)).not.toBeNull();
+      expect(ids).toContain(headerByKey(groupPathKey('EMEA', 'Sales'))!.id);
+      const sub = headerByKey(groupPathKey('EMEA', 'Sales'))!.querySelector('[aria-expanded]')!;
+      expect(sub.getAttribute('aria-controls')!.trim().split(/\s+/).length).toBe(2);
+    });
+
+    it('nested headers indent by level * indentSize', () => {
+      render(
+        <TkxDataGrid
+          columns={mCols}
+          data={mData}
+          rowKey="id"
+          groupBy={['region', 'dept', 'team']}
+          indentSize={20}
+        />,
+        { wrapper: Wrapper },
+      );
+      const spacerWidth = (row: HTMLElement) => {
+        const spacer = row.querySelector('td span span[aria-hidden="true"]') as HTMLElement | null;
+        return spacer ? spacer.style.width : '0';
+      };
+      expect(spacerWidth(headerByKey('EMEA')!)).toBe('0');
+      expect(spacerWidth(headerByKey(groupPathKey('EMEA', 'Sales'))!)).toBe('20px');
+      expect(spacerWidth(headerByKey(groupPathKey('EMEA', 'Sales', 'North'))!)).toBe('40px');
+    });
+
+    it('keyboard: ArrowLeft/ArrowRight on a nested header cell collapse/expand it; Enter toggles', () => {
+      render(
+        <TkxDataGrid columns={mCols} data={mData} rowKey="id" groupBy={['region', 'dept']} />,
+        { wrapper: Wrapper },
+      );
+      const sub = headerByKey(groupPathKey('EMEA', 'Sales'))!;
+      const cell = sub.querySelector('td[role="rowheader"]') as HTMLTableCellElement;
+      cell.focus();
+      fireEvent.keyDown(cell, { key: 'ArrowLeft' });
+      expect(screen.queryByText('Ann')).not.toBeInTheDocument();
+      const subAgain = headerByKey(groupPathKey('EMEA', 'Sales'))!;
+      const cellAgain = subAgain.querySelector('td[role="rowheader"]') as HTMLTableCellElement;
+      fireEvent.keyDown(cellAgain, { key: 'ArrowRight' });
+      expect(screen.getByText('Ann')).toBeInTheDocument();
+      fireEvent.keyDown(
+        headerByKey(groupPathKey('EMEA', 'Sales'))!.querySelector('td[role="rowheader"]')!,
+        { key: 'Enter' },
+      );
+      expect(screen.queryByText('Ann')).not.toBeInTheDocument();
+    });
+
+    it('keyboard: ArrowDown walks from a level-0 header through nested headers and detail rows', () => {
+      render(
+        <TkxDataGrid columns={mCols} data={mData} rowKey="id" groupBy={['region', 'dept']} />,
+        { wrapper: Wrapper },
+      );
+      const first = headerByKey('EMEA')!.querySelector('td[role="rowheader"]') as HTMLTableCellElement;
+      first.focus();
+      fireEvent.keyDown(first, { key: 'ArrowDown' });
+      expect(document.activeElement!.closest('tr')).toBe(headerByKey(groupPathKey('EMEA', 'Sales')));
+      fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' });
+      expect(document.activeElement!.closest('tr')!.textContent).toContain('Ann');
+    });
+
+    it('sorting applies within leaf groups while group structure is preserved', () => {
+      render(
+        <TkxDataGrid
+          columns={mCols.map(c => ({ ...c, sortable: true }))}
+          data={mData}
+          rowKey="id"
+          sortable
+          groupBy={['region', 'dept']}
+        />,
+        { wrapper: Wrapper },
+      );
+      const amountHeader = screen.getByRole('columnheader', { name: /amount/i });
+      fireEvent.click(amountHeader); // asc
+      fireEvent.click(amountHeader); // desc
+      const names = detailRows().map(r => r.querySelectorAll('td')[3].textContent);
+      // Groups ordered by first appearance in the sorted list (APAC first,
+      // since Fay=600 sorts first), rows descending inside each leaf group.
+      expect(names).toEqual(['Fay', 'Eve', 'Dan', 'Cat', 'Ben', 'Ann']);
+      expect(groupRows()[0].textContent).toContain('APAC');
+      expect(groupRows()[1].textContent).toContain('Eng');
+    });
+
+    it('filter composes with multi-level grouping (empty groups disappear)', () => {
+      render(
+        <TkxDataGrid
+          columns={mCols.map(c => ({ ...c, filterable: true }))}
+          data={mData}
+          rowKey="id"
+          showFilters
+          groupBy={['region', 'dept']}
+        />,
+        { wrapper: Wrapper },
+      );
+      const inputs = screen.getAllByRole('textbox');
+      fireEvent.change(inputs[3], { target: { value: 'Fay' } });
+      expect(detailRows().length).toBe(1);
+      expect(groupRows().map(r => r.dataset.groupKey)).toEqual(['APAC', groupPathKey('APAC', 'Eng')]);
+    });
+
+    it('backward compat: groupBy="region" and groupBy={["region"]} are equivalent and keep plain keys', () => {
+      const onGroupToggle = vi.fn();
+      const { unmount } = render(
+        <TkxDataGrid
+          columns={mCols}
+          data={mData}
+          rowKey="id"
+          groupBy="region"
+          defaultExpandedGroups={['APAC']}
+          onGroupToggle={onGroupToggle}
+        />,
+        { wrapper: Wrapper },
+      );
+      const single = groupRows().map(r => [r.dataset.groupKey, r.dataset.groupLevel, r.textContent]);
+      expect(single.map(s => s[0])).toEqual(['EMEA', 'APAC']);
+      expect(detailRows().length).toBe(3);
+      expect(detailRows()[0].getAttribute('data-group-key')).toBe('APAC');
+      fireEvent.click(headerByKey('EMEA')!);
+      expect(onGroupToggle).toHaveBeenCalledWith('EMEA', true);
+      unmount();
+      render(
+        <TkxDataGrid
+          columns={mCols}
+          data={mData}
+          rowKey="id"
+          groupBy={['region']}
+          defaultExpandedGroups={['APAC']}
+        />,
+        { wrapper: Wrapper },
+      );
+      const arr = groupRows().map(r => [r.dataset.groupKey, r.dataset.groupLevel, r.textContent]);
+      expect(arr).toEqual(single);
+      expect(detailRows().length).toBe(3);
+    });
+
+    it('an unknown key anywhere in the array logs a warning and renders ungrouped', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      render(
+        <TkxDataGrid columns={mCols} data={mData} rowKey="id" groupBy={['region', 'nope']} />,
+        { wrapper: Wrapper },
+      );
+      expect(groupRows().length).toBe(0);
+      expect(screen.getAllByRole('row').length).toBe(7); // header + 6
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('nope'));
+      warn.mockRestore();
     });
   });
 

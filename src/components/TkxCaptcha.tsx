@@ -84,13 +84,34 @@ const GLOBAL_KEY: Record<CaptchaProvider, string> = {
 
 const SITEKEY_PATTERN = /^[A-Za-z0-9_-]{20,80}$/;
 
+type CaptchaWidgetId = string | number;
+
+/**
+ * The subset of the Turnstile / hCaptcha / reCAPTCHA globals we call. All three
+ * share this render/reset/execute/remove shape; the render options differ per
+ * provider so they stay loosely typed here.
+ */
+interface CaptchaProviderGlobal {
+  render: (container: HTMLElement, options: Record<string, unknown>) => CaptchaWidgetId;
+  reset?: (widgetId: CaptchaWidgetId) => void;
+  execute?: (widgetId: CaptchaWidgetId) => void;
+  remove?: (widgetId: CaptchaWidgetId) => void;
+}
+
+/** Read the provider's global off `window` (undefined until its script has loaded). */
+function getProviderGlobal(provider: CaptchaProvider): CaptchaProviderGlobal | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const value = (window as unknown as Record<string, unknown>)[GLOBAL_KEY[provider]];
+  return value && typeof value === 'object' ? (value as CaptchaProviderGlobal) : undefined;
+}
+
 // Track which scripts we've started loading to dedupe across instances.
 const scriptPromises: Partial<Record<CaptchaProvider, Promise<void>>> = {};
 
 function loadProviderScript(provider: CaptchaProvider, language?: string): Promise<void> {
   if (typeof window === 'undefined') return Promise.resolve();
   // Already loaded?
-  if ((window as any)[GLOBAL_KEY[provider]]) return Promise.resolve();
+  if (getProviderGlobal(provider)) return Promise.resolve();
   // In flight?
   if (scriptPromises[provider]) return scriptPromises[provider]!;
 
@@ -157,7 +178,7 @@ export const TkxCaptcha = forwardRef<TkxCaptchaHandle, TkxCaptchaProps>(function
           tokenRef.current = null;
           return;
         }
-        const provObj = (window as any)[GLOBAL_KEY[provider]];
+        const provObj = getProviderGlobal(provider);
         if (!provObj || widgetIdRef.current == null) return;
         try {
           provObj.reset?.(widgetIdRef.current);
@@ -175,7 +196,7 @@ export const TkxCaptcha = forwardRef<TkxCaptchaHandle, TkxCaptchaProps>(function
           }, 200);
           return;
         }
-        const provObj = (window as any)[GLOBAL_KEY[provider]];
+        const provObj = getProviderGlobal(provider);
         if (!provObj || widgetIdRef.current == null) return;
         try {
           provObj.execute?.(widgetIdRef.current);
@@ -206,7 +227,7 @@ export const TkxCaptcha = forwardRef<TkxCaptchaHandle, TkxCaptchaProps>(function
     loadProviderScript(provider, language)
       .then(() => {
         if (cancelled || !host) return;
-        const provObj = (window as any)[GLOBAL_KEY[provider]];
+        const provObj = getProviderGlobal(provider);
         if (!provObj) return;
 
         const commonCallbacks = {
@@ -260,7 +281,7 @@ export const TkxCaptcha = forwardRef<TkxCaptchaHandle, TkxCaptchaProps>(function
 
     return () => {
       cancelled = true;
-      const provObj = (window as any)[GLOBAL_KEY[provider]];
+      const provObj = getProviderGlobal(provider);
       if (provObj && widgetId != null) {
         try {
           provObj.remove?.(widgetId);

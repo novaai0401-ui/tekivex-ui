@@ -452,9 +452,6 @@ export function TkxColorPicker({
   const [popPos, setPopPos] = useState({ top: 0, left: 0 });
 
   const [hue, sat, light] = hexToHsl(isValidHex(hex) ? hex : defaultValue);
-  // Convert HSL lightness → brightness for SB picker
-  // brightness ≈ lightness + saturation * min(lightness, 1-lightness)
-  const bright = Math.round(light + (sat / 100) * Math.min(light / 100, 1 - light / 100) * 100);
 
   const updateColor = useCallback((newHex: string, newAlpha = alpha) => {
     if (!isValidHex(newHex)) return;

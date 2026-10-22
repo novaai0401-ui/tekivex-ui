@@ -33,7 +33,6 @@ import * as React from 'react';
 import {
   forwardRef,
   useCallback,
-  useEffect,
   useId,
   useMemo,
   useRef,

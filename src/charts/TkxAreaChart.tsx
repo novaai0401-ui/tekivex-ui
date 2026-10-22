@@ -11,7 +11,14 @@ import {
   Legend,
 } from 'recharts';
 import { useTheme } from '../themes';
-import { getDefaultColors, tooltipStyle, DEFAULT_MARGIN, type ChartMargin } from './shared';
+import {
+  getDefaultColors,
+  tooltipStyle,
+  DEFAULT_MARGIN,
+  type ChartMargin,
+  type ChartDatum,
+  type ChartTickFormatter,
+} from './shared';
 
 export interface TkxAreaChartSeries {
   key: string;
@@ -24,7 +31,7 @@ export interface TkxAreaChartSeries {
 }
 
 export interface TkxAreaChartProps {
-  data: Record<string, any>[];
+  data: ChartDatum[];
   series: TkxAreaChartSeries[];
   xKey: string;
   height?: number;
@@ -34,8 +41,8 @@ export interface TkxAreaChartProps {
   showTooltip?: boolean;
   /** Smooth curves. Default: true */
   smooth?: boolean;
-  xTickFormatter?: (value: any) => string;
-  yTickFormatter?: (value: any) => string;
+  xTickFormatter?: ChartTickFormatter;
+  yTickFormatter?: ChartTickFormatter;
   yDomain?: [number | 'auto' | 'dataMin' | 'dataMax', number | 'auto' | 'dataMin' | 'dataMax'];
   /** aria-label for the chart container */
   ariaLabel?: string;

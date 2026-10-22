@@ -238,6 +238,17 @@ export default function App() {
 }
 ```
 
+**Already have a design system?** Point TekiVex at the CSS variables you own instead of adopting our theme object — anything you don't map falls back to a built-in theme. Tailwind users get a preset (`tekivex-ui/tailwind`) whose `bg-tkx-surface` / `text-tkx-primary` utilities resolve through the same `--tkx-*` variables, and `tekivexCssVariables(theme)` prints a `:root { … }` block to paste into a global stylesheet. See [Bring your own tokens](./docs-site/src/content/docs/themes.mdx#bring-your-own-tokens).
+
+```tsx
+import { ThemeProvider, themeFromCSSVars } from 'tekivex-ui';
+
+const theme = themeFromCSSVars({ bg: '--app-canvas', text: '--app-fg', primary: '--brand-500' });
+// theme.primary === 'var(--brand-500, #0d7c5f)'; unmapped tokens come from auroraLight
+
+<ThemeProvider theme={theme}>…</ThemeProvider>
+```
+
 ---
 
 ## Package Exports

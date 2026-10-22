@@ -46,10 +46,10 @@ function bestSelector(el: HTMLElement, root: HTMLElement): string {
   const path: string[] = [];
   let cur: HTMLElement | null = el;
   while (cur && cur !== root) {
-    const parent = cur.parentElement;
+    const parent: HTMLElement | null = cur.parentElement;
     if (!parent) break;
     const tag = cur.tagName.toLowerCase();
-    const sameTag = Array.from(parent.children).filter((c) => c.tagName === cur!.tagName);
+    const sameTag = Array.from(parent.children).filter((c: Element) => c.tagName === cur!.tagName);
     const idx = sameTag.indexOf(cur) + 1;
     path.unshift(`${tag}:nth-of-type(${idx})`);
     cur = parent;

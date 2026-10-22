@@ -29,8 +29,9 @@ export interface TkxScatterChartProps {
   showTooltip?: boolean;
   xLabel?: string;
   yLabel?: string;
-  xTickFormatter?: (value: any) => string;
-  yTickFormatter?: (value: any) => string;
+  /** Both scatter axes are numeric, so ticks are always numbers. */
+  xTickFormatter?: (value: number) => string;
+  yTickFormatter?: (value: number) => string;
   /** Z-axis range (bubble size). Default: [20, 400] */
   zRange?: [number, number];
   ariaLabel?: string;
