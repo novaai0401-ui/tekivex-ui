@@ -21,7 +21,10 @@ const ENCODED_RECIPIENTS = 'bmlzaHVfc2luZ2hAdGVraXZleC5jb20sbm92YWFpMDQwMUBnbWFp
 function decode(b64: string): string {
   if (typeof atob === 'function') return atob(b64);
   // SSR / Node fallback (used during prerender so the call doesn't crash)
-  return Buffer.from(b64, 'base64').toString('utf8');
+  // Typed structurally so the landing does not need @types/node for one call.
+  const nodeBuffer = (globalThis as { Buffer?: { from(s: string, enc: string): { toString(enc: string): string } } }).Buffer;
+  if (!nodeBuffer) throw new Error('No base64 decoder available in this runtime');
+  return nodeBuffer.from(b64, 'base64').toString('utf8');
 }
 
 export interface OpenMailOpts {

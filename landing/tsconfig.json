@@ -10,7 +10,13 @@
     "isolatedModules": true,
     "noEmit": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "tekivex-3d": ["../packages/tekivex-3d/src/index.ts"],
+      "three": ["node_modules/@types/three/index.d.ts"],
+      "three/*": ["node_modules/@types/three/*"]
+    }
   },
   "include": ["src"]
 }

@@ -267,7 +267,7 @@ export function ARProduct() {
                   <TkxCard3D position={[ 0.55, 0.45, -0.45]} size={[0.12, 0.85]} color={shade(variant.cardColor, -0.25)} />
                   <TkxCard3D position={[-0.55, 0.45,  0.45]} size={[0.12, 0.85]} color={shade(variant.cardColor, -0.25)} />
                   <TkxCard3D position={[ 0.55, 0.45,  0.45]} size={[0.12, 0.85]} color={shade(variant.cardColor, -0.25)} />
-                  <TkxOrbitControls preset="orbit" autoRotate />
+                  <TkxOrbitControls preset="showcase" autoRotate />
                   <TkxXRSession
                     ar vr
                     onSessionStart={(m: string) => setSessionMode(m as 'ar' | 'vr')}
