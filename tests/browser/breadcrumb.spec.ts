@@ -8,12 +8,6 @@ test.describe('Breadcrumb', () => {
   test.beforeEach(async ({ page }) => gotoComponent(page, 'breadcrumb'));
 
   test('axe: no serious/critical WCAG 2.1 AA violations', async ({ page }) => {
-    // DEFECT (TkxBreadcrumb, maxItems): the "…" <button> is rendered inside an
-    // <li role="presentation">, which removes the listitem semantics, so the
-    // <ol role="list"> ends up with a direct non-listitem child → axe
-    // `aria-required-children` (critical). Source: src/components/TkxBreadcrumb.tsx
-    // (collapsed-items <li role="presentation"> around the ellipsis button).
-    test.fixme(true, 'TkxBreadcrumb ellipsis button is not inside a listitem (aria-required-children)');
     await expectNoSeriousViolations(page);
   });
 
@@ -51,11 +45,6 @@ test.describe('Breadcrumb', () => {
   });
 
   test('keyboard: focus is not lost when "…" is replaced by the revealed links', async ({ page }) => {
-    // DEFECT (TkxBreadcrumb): activating "…" removes the button from the DOM
-    // without moving focus, so document.activeElement falls back to <body>
-    // (WCAG 2.4.3 focus order). Source: src/components/TkxBreadcrumb.tsx
-    // setExpanded(true) at ~line 122 — should focus the first revealed link.
-    test.fixme(true, 'TkxBreadcrumb drops focus to <body> after expanding "…"');
     const region = page.getByRole('region', { name: 'Live demo: Collapsed with maxItems' });
     const collapsedNav = region.locator('nav').first();
     const ellipsis = collapsedNav.getByRole('button', { name: 'Show hidden breadcrumb items' });

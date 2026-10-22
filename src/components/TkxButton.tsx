@@ -32,6 +32,30 @@ export interface TkxButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> 
   isDisabled?: boolean;
 }
 
+const HEX_RE = /^#[0-9a-fA-F]{6}$|^#[0-9a-fA-F]{3}$/;
+const VAR_FALLBACK_RE = /^var\(\s*--[\w-]+\s*,\s*([^)]+)\)$/;
+
+/** `#abc`/`#aabbcc` → itself; `var(--x, #aabbcc)` → `#aabbcc`; anything else → undefined. */
+function resolveHex(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const v = value.trim();
+  if (HEX_RE.test(v)) return v;
+  const m = VAR_FALLBACK_RE.exec(v);
+  if (m) return resolveHex(m[1]);
+  return undefined;
+}
+
+/**
+ * Last-resort foreground when the accent is a bare `var()` with no literal we
+ * can read in JS: let CSS pick black or white from the token's relative
+ * luminance (WCAG threshold L = 0.179) via relative colour syntax.
+ */
+function cssContrastForeground(bg: string): string {
+  const lum = `(0.2126 * pow(r / 255, 2.2) + 0.7152 * pow(g / 255, 2.2) + 0.0722 * pow(b / 255, 2.2))`;
+  const ch = `clamp(0, (0.179 - ${lum}) * 100000, 255)`;
+  return `rgb(from ${bg} ${ch} ${ch} ${ch})`;
+}
+
 const SIZE_CLASS: Record<ButtonSize, string> = {
   sm: 'text-xs font-semibold',
   md: 'text-sm font-semibold',
@@ -120,7 +144,17 @@ export const TkxButton = forwardRef<HTMLButtonElement, TkxButtonProps>(
       danger: theme.css.danger, warning: theme.css.warning, success: theme.css.success,
     };
     const accentColor = colorMap[colorScheme];
-    const textOnAccent = getAccessibleForeground(accentColor, ['#ffffff', '#000000', theme.css.bg]);
+    // Contrast maths needs a literal colour. `theme.css.*` are `var(--tkx-…)`
+    // references, which the WCAG engine cannot parse (they decode as black, so
+    // every scheme used to get white text — 2.37:1 on the light warning token).
+    // Resolve through `theme.raw` (hex) and fall back to the `var()` fallback
+    // literal; a token that is a bare `var()` with no literal anywhere gets a
+    // CSS-computed foreground instead.
+    const accentHex = resolveHex(theme.raw?.[colorScheme]) ?? resolveHex(accentColor);
+    const bgHex = resolveHex(theme.raw?.bg) ?? resolveHex(theme.css.bg);
+    const textOnAccent = accentHex
+      ? getAccessibleForeground(accentHex, ['#ffffff', '#000000', ...(bgHex ? [bgHex] : [])])
+      : cssContrastForeground(accentColor);
 
     const safeChildren = typeof children === 'string' ? sanitizeString(children) : children;
     const safeLoadingText = loadingText ? sanitizeString(loadingText) : undefined;

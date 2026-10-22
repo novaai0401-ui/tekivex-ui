@@ -2,6 +2,20 @@ import { forwardRef, type HTMLAttributes } from 'react';
 import { cssTokens } from '../themes/cssTokens';
 import { getAccessibleForeground } from '../engine/wcag';
 import { sanitizeString } from '../engine/security';
+
+const HEX_RE = /^#[0-9a-fA-F]{6}$|^#[0-9a-fA-F]{3}$/;
+
+/**
+ * Black or white, whichever contrasts more with `bg`. A literal hex is decided
+ * in JS; a `var()` reference is decided by CSS (relative colour syntax,
+ * WCAG luminance threshold L = 0.179), which also tracks live theme changes.
+ */
+function contrastForeground(bg: string): string {
+  if (HEX_RE.test(bg.trim())) return getAccessibleForeground(bg);
+  const lum = `(0.2126 * pow(r / 255, 2.2) + 0.7152 * pow(g / 255, 2.2) + 0.0722 * pow(b / 255, 2.2))`;
+  const ch = `clamp(0, (0.179 - ${lum}) * 100000, 255)`;
+  return `rgb(from ${bg} ${ch} ${ch} ${ch})`;
+}
 import { tkx, cx } from '../engine/tkx';
 
 export type BadgeVariant = 'default' | 'primary' | 'secondary' | 'danger' | 'warning' | 'success' | 'info';
@@ -31,7 +45,12 @@ export const TkxBadge = forwardRef<HTMLSpanElement, TkxBadgeProps>(
       danger: cssTokens.danger, warning: cssTokens.warning, success: cssTokens.success, info: cssTokens.info,
     };
     const bgColor = colorMap[variant] || '#666666';
-    const textColor = getAccessibleForeground(bgColor, ['#ffffff', '#000000', cssTokens.bg || '#000000']);
+    // TkxBadge is RSC-safe (no theme context), so the background is only ever
+    // known as a `var(--tkx-*)` reference that JS contrast maths cannot read
+    // (it decoded as black → white text on every variant: 1.42:1 on the light
+    // border token, 2.37:1 on the light warning token). Let CSS pick black or
+    // white from the resolved token's luminance instead.
+    const textColor = contrastForeground(bgColor);
 
     const safeChildren = typeof children === 'string' ? sanitizeString(children) : children;
 

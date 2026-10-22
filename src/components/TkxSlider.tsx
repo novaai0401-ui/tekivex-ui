@@ -5,6 +5,7 @@ import {
   useRef,
   useId,
   useCallback,
+  useMemo,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { useTheme } from '../themes';
@@ -235,11 +236,20 @@ export function TkxSlider({
 
   const isControlled = value !== undefined;
   const [internalValue, setInternalValue] = useState(defaultValue);
-  const singleValue = isControlled ? value! : internalValue;
+  // Clamp the rendered/announced value into [min, max] so aria-valuenow is
+  // always within [aria-valuemin, aria-valuemax] even if a caller passes an
+  // out-of-range value.
+  const singleValue = clamp(isControlled ? value! : internalValue, min, max);
 
   const isRangeControlled = rangeValue !== undefined;
   const [internalRange, setInternalRange] = useState<[number, number]>([min, max]);
-  const rangeVal = isRangeControlled ? rangeValue! : internalRange;
+  const rawRange = isRangeControlled ? rangeValue! : internalRange;
+  const rawLo = rawRange[0];
+  const rawHi = rawRange[1];
+  const rangeVal = useMemo<[number, number]>(() => {
+    const lo = clamp(rawLo, min, max);
+    return [lo, clamp(Math.max(rawHi, lo), min, max)];
+  }, [rawLo, rawHi, min, max]);
 
   const trackRef = useRef<HTMLDivElement>(null);
   const singleValueRef = useRef(singleValue);

@@ -183,6 +183,19 @@ describe('TkxSelect', () => {
       fireEvent.click(getCombobox());
       expect(getListbox()).toHaveAttribute('aria-multiselectable', 'true');
     });
+
+    // D2: aria-multiselectable is not allowed on role=combobox.
+    it('combobox trigger never carries aria-multiselectable', () => {
+      render(<TkxSelect options={options} multiple />, { wrapper: Wrapper });
+      expect(getCombobox()).not.toHaveAttribute('aria-multiselectable');
+    });
+
+    it('placeholder is painted in textMuted without extra opacity', () => {
+      render(<TkxSelect options={options} placeholder="Choose fruit" />, { wrapper: Wrapper });
+      const ph = screen.getByText('Choose fruit') as HTMLElement;
+      expect(ph.style.opacity).toBe('');
+      expect(ph.style.color).toContain('--tkx-textMuted');
+    });
   });
 
   // ── Searchable ───────────────────────────────────────────────────────────

@@ -32,7 +32,7 @@ const SLIDER_PROPS = [
 export function SliderPage({ theme }: { theme: ThemeTokens }) {
   const [basic, setBasic] = useState(40);
   const [range, setRange] = useState<[number, number]>([20, 70]);
-  const [custom, setCustom] = useState(50);
+  const [custom, setCustom] = useState(22);
   const [marks, setMarks] = useState(3);
   const [volume, setVolume] = useState(60);
   const [brightness, setBrightness] = useState(75);

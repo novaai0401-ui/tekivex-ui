@@ -36,12 +36,6 @@ test.describe('Slider', () => {
   });
 
   test('a11y: every slider has an accessible name and aria-valuenow within [min,max]', async ({ page }) => {
-    // DEFECT (TkxSlider + demo): the "Custom Min / Max / Step" example passes
-    // value=50 with min=16/max=32 (demo/docs/SliderPage.tsx:35 vs :165-166) and
-    // TkxSlider publishes it verbatim as aria-valuenow="50". ARIA requires
-    // valuenow within [valuemin, valuemax]; the component should clamp.
-    // Source: src/components/TkxSlider.tsx (aria-valuenow={value}, no clamp).
-    test.fixme(true, 'TkxSlider does not clamp aria-valuenow into [min,max] (demo passes 50 for 16..32)');
     const problems = await page.getByRole('slider').evaluateAll(els =>
       els
         .map(el => ({

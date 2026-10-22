@@ -2,13 +2,33 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TkxButton } from '../src/components/TkxButton';
 import { ThemeProvider } from '../src/themes';
-import { quantumDark } from '../src/themes';
+import { quantumDark, auroraLight } from '../src/themes';
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   return <ThemeProvider theme={quantumDark}>{children}</ThemeProvider>;
 }
 
 describe('TkxButton', () => {
+  // D1: the accent must be resolved to a literal hex before the contrast
+  // check, otherwise every scheme gets white text.
+  it('solid warning uses dark text on the light theme warning token', () => {
+    render(
+      <ThemeProvider theme={auroraLight}>
+        <TkxButton colorScheme="warning">Warn</TkxButton>
+      </ThemeProvider>,
+    );
+    expect(screen.getByRole('button').style.color).toBe('rgb(0, 0, 0)');
+  });
+
+  it('solid secondary keeps white text on the light theme secondary token', () => {
+    render(
+      <ThemeProvider theme={auroraLight}>
+        <TkxButton colorScheme="secondary">Go</TkxButton>
+      </ThemeProvider>,
+    );
+    expect(screen.getByRole('button').style.color).toBe('rgb(255, 255, 255)');
+  });
+
   it('renders children', () => {
     render(<TkxButton>Click me</TkxButton>, { wrapper: Wrapper });
     expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();

@@ -7,6 +7,10 @@ import {
   useCallback,
   useId,
   isValidElement,
+  cloneElement,
+  type ReactElement,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
   type ReactNode,
   type CSSProperties,
 } from 'react';
@@ -262,50 +266,83 @@ export function TkxPopover({
     )
   ) : null;
 
-  // A trigger is "interactive" (and thus already keyboard-operable) if it's a
-  // native button/anchor or carries its own onClick/role=button/tabIndex.
-  // Mirrors TkxDropdown's trigger promotion logic.
-  const triggerProps = isValidElement(trigger)
+  // The trigger element itself is the control (D7). Wrapping it in a
+  // <div role="button" tabindex="0"> produced a nested-interactive wrapper
+  // around the caller's <button> (axe `nested-interactive`, two Tab stops).
+  // Instead, when `trigger` is a React element we clone it and attach the
+  // handlers + ARIA directly; the wrapper <div> is a role-less, non-focusable
+  // positioning box. A native <button>/<a> is already keyboard-operable
+  // (Enter/Space → click); any other element (span, icon, custom component
+  // that does not render a button) is promoted with role="button"/tabIndex=0
+  // and an Enter/Space handler so keyboard users can open the popover.
+  // For non-element children (plain text) the wrapper takes the control role.
+  const triggerIsElement = isValidElement(trigger);
+  const triggerProps = triggerIsElement
     ? ((trigger as { props?: Record<string, unknown> }).props ?? {})
     : {};
-  const triggerType = isValidElement(trigger) ? (trigger as { type?: unknown }).type : undefined;
-  const triggerIsInteractive =
+  const triggerType = triggerIsElement ? (trigger as { type?: unknown }).type : undefined;
+  const triggerIsNative =
     triggerType === 'button' ||
     triggerType === 'a' ||
-    'onClick' in triggerProps ||
     triggerProps.role === 'button' ||
-    triggerProps.tabIndex !== undefined;
+    triggerProps.tabIndex !== undefined ||
+    // Custom components that forward props to a native <button> (e.g. TkxButton).
+    (typeof triggerType !== 'string' && triggerType !== undefined);
+
+  const controlAria = {
+    'aria-expanded': open,
+    'aria-haspopup': 'dialog' as const,
+    'aria-controls': open ? popoverId : undefined,
+  };
+
+  const handleControlKeyDown = (e: ReactKeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggle();
+    }
+  };
+
+  const handleControlClick = (e: ReactMouseEvent) => {
+    (triggerProps.onClick as ((ev: ReactMouseEvent) => void) | undefined)?.(e);
+    if (e.defaultPrevented) return;
+    toggle();
+  };
+
+  const control = triggerIsElement
+    ? cloneElement(trigger as ReactElement<Record<string, unknown>>, {
+        ...controlAria,
+        onClick: handleControlClick,
+        ...(triggerIsNative
+          ? {}
+          : {
+              role: 'button',
+              tabIndex: 0,
+              onKeyDown: (e: ReactKeyboardEvent) => {
+                (triggerProps.onKeyDown as ((ev: ReactKeyboardEvent) => void) | undefined)?.(e);
+                if (e.defaultPrevented) return;
+                handleControlKeyDown(e);
+              },
+            }),
+      })
+    : trigger;
 
   return (
     <>
       <div
         ref={triggerRef}
         className={tkx('inline-flex')}
-        onClick={toggle}
-        // If the consumer passed a real interactive trigger (e.g. a <button>),
-        // it is already focusable and keyboard-operable (native Enter/Space ->
-        // click bubbles to this onClick), so the wrapper stays a passthrough.
-        // Only when the trigger is NON-interactive (span, icon, text) do we
-        // promote the wrapper to a focusable button so keyboard users can open
-        // the popover at all (was a bare div → WCAG 2.1.1).
-        role={triggerIsInteractive ? undefined : 'button'}
-        tabIndex={triggerIsInteractive ? undefined : 0}
-        onKeyDown={
-          triggerIsInteractive
-            ? undefined
-            : (e) => {
-                if (e.target !== e.currentTarget) return;
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  toggle();
-                }
-              }
-        }
-        aria-expanded={open}
-        aria-haspopup="dialog"
-        aria-controls={open ? popoverId : undefined}
+        // Non-element children (plain text): the wrapper is the control.
+        {...(triggerIsElement
+          ? {}
+          : {
+              role: 'button',
+              tabIndex: 0,
+              onClick: toggle,
+              onKeyDown: handleControlKeyDown,
+              ...controlAria,
+            })}
       >
-        {trigger}
+        {control}
       </div>
       {portalContent}
       {/* Inject animation keyframes */}

@@ -665,11 +665,10 @@ describe('TkxDataGrid', () => {
         <TkxDataGrid columns={cols} data={pData} rowKey="id" />,
         { wrapper: Wrapper },
       );
-      // The scroll container is the inner div with overflowX: auto. Find it
-      // by walking the grid's children — it is the one with onScroll wired.
-      const scrollDiv = container.querySelector(
-        'div[role="grid"] > div:not([role])',
-      ) as HTMLElement | null;
+      // The scroll container is the div with overflowX: auto that wraps the
+      // <table role="grid"> — it is the one with onScroll wired.
+      const scrollDiv = container.querySelector('table[role="grid"]')
+        ?.parentElement as HTMLElement | null;
       expect(scrollDiv).not.toBeNull();
       // Initially scrollLeft is 0, so no data-scrolled-left attribute
       expect(scrollDiv!.hasAttribute('data-scrolled-left')).toBe(false);
@@ -2039,6 +2038,15 @@ describe('TkxDataGrid', () => {
     // (tabIndex=0) and every cell was -1. The full roving-tabindex model
     // replaces it: the container is only a programmatic-focus fallback
     // (tabIndex=-1) and exactly one cell carries tabIndex=0.
+    it('D12: the grid role is on the <table> itself, not on a wrapper <div>', () => {
+      render(<TkxDataGrid columns={columns} data={data} rowKey="id" />, { wrapper: Wrapper });
+      const grid = screen.getByRole('grid');
+      expect(grid.tagName).toBe('TABLE');
+      expect(document.querySelector('div[role="grid"], div[role="treegrid"]')).toBeNull();
+      // Every direct child of the grid is a native row group.
+      Array.from(grid.children).forEach((c) => expect(['THEAD', 'TBODY']).toContain(c.tagName));
+    });
+
     it('grid container is NOT a Tab stop but grid.focus() still forwards to the first cell', () => {
       render(<TkxDataGrid columns={columns} data={data} rowKey="id" />, { wrapper: Wrapper });
       const grid = screen.getByRole('grid');

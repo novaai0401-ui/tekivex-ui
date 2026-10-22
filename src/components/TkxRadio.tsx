@@ -102,10 +102,7 @@ export const TkxRadio = forwardRef<HTMLInputElement, TkxRadioProps>(
     const outerBg = theme.css.surface;
 
     return (
-      <div
-        className={cx(tkx('flex flex-col gap-0.5'), className)}
-        style={{ opacity: isDisabled ? 0.5 : 1, ...style }}
-      >
+      <div className={cx(tkx('flex flex-col gap-0.5'), className)} style={style}>
         <style>{`
           @keyframes tkx-radio-dot-in {
             from { transform: scale(0) translate(-50%, -50%); opacity: 0; }
@@ -116,7 +113,15 @@ export const TkxRadio = forwardRef<HTMLInputElement, TkxRadioProps>(
         <label
           htmlFor={id}
           className={tkx('flex items-center gap-2 select-none')}
-          style={{ cursor: isDisabled ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}
+          // Disabled dimming applies to the control + its label only (axe
+          // exempts a disabled input's label). The hint below is ordinary text
+          // and must keep the full `textMuted` colour: at 50% it measured
+          // #b5b2b0 on #fff = 2.1:1.
+          style={{
+            cursor: isDisabled ? 'not-allowed' : 'pointer',
+            fontFamily: 'inherit',
+            opacity: isDisabled ? 0.5 : 1,
+          }}
         >
           {/* Hidden native input */}
           <input
@@ -193,7 +198,8 @@ TkxRadio.displayName = 'TkxRadio';
 // ── TkxRadioGroup ─────────────────────────────────────────────────────────────
 
 export interface TkxRadioGroupProps {
-  name: string;
+  /** Shared `name` for the radios. Generated with `useId()` when omitted. */
+  name?: string;
   value?: string;
   defaultValue?: string;
   onChange?: (value: string) => void;
@@ -220,6 +226,9 @@ export function TkxRadioGroup({
   const theme = useTheme();
   const groupId = useId();
   const errorId = `${groupId}-error`;
+  // Radios only form a native group (one Tab stop, arrow keys — Firefox
+  // requires it) when they share a non-empty `name`; always provide one.
+  const groupName = name || `tkx-radio-${groupId}`;
 
   const [internalValue, setInternalValue] = useState(defaultValue);
   const isControlled = valueProp !== undefined;
@@ -234,7 +243,7 @@ export function TkxRadioGroup({
 
   return (
     <RadioGroupContext.Provider
-      value={{ name, value: currentValue, onChange: handleChange, isDisabled, isInvalid }}
+      value={{ name: groupName, value: currentValue, onChange: handleChange, isDisabled, isInvalid }}
     >
       <div
         role="radiogroup"

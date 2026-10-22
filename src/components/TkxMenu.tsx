@@ -6,9 +6,13 @@ import {
   useEffect,
   useCallback,
   useId,
+  isValidElement,
+  cloneElement,
+  type ReactElement,
   type ReactNode,
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../themes';
@@ -348,6 +352,12 @@ interface MenuPanelProps {
   onClose: () => void;
   onCloseAll: () => void;
   isSubmenu?: boolean;
+  /**
+   * Which item to make active when the panel mounts (APG menu button:
+   * Enter/Space/ArrowDown → first item, ArrowUp → last item). Disabled items
+   * are skipped. Omit for pointer-opened menus (no active item).
+   */
+  initialActive?: 'first' | 'last';
 }
 
 function MenuPanel({
@@ -357,9 +367,16 @@ function MenuPanel({
   onClose,
   onCloseAll,
   isSubmenu = false,
+  initialActive,
 }: MenuPanelProps) {
   const theme = useTheme();
-  const [activeIdx, setActiveIdx] = useState(-1);
+  const [activeIdx, setActiveIdx] = useState(() => {
+    if (!initialActive) return -1;
+    const all = flattenItems(items);
+    const enabled = all.filter((fi) => !fi.item.disabled);
+    if (enabled.length === 0) return -1;
+    return initialActive === 'last' ? enabled[enabled.length - 1].idx : enabled[0].idx;
+  });
   const [openSubmenuId, setOpenSubmenuId] = useState<string | null>(null);
   const [submenuPos, setSubmenuPos] = useState<PanelPosition | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -844,7 +861,8 @@ function MenuPanel({
                 fontFamily: 'inherit',
                 flexShrink: 0,
                 marginLeft: 16,
-                opacity: 0.8,
+                // No extra opacity: textMuted is tuned for 4.5:1 at small sizes;
+                // fading it to .8 dropped 12px shortcut hints to 3.69:1 (WCAG AA).
               }}
             >
               {sanitizeString(actionItem.shortcut)}
@@ -932,8 +950,9 @@ export function TkxMenu({
   const [isOpen, setIsOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<PanelPosition | null>(null);
   const triggerRef = useRef<HTMLSpanElement>(null);
+  const [initialActive, setInitialActive] = useState<'first' | 'last' | undefined>(undefined);
 
-  const openMenu = useCallback(() => {
+  const openMenu = useCallback((active?: 'first' | 'last') => {
     if (isDisabled) return;
     const el = triggerRef.current;
     if (!el) return;
@@ -941,6 +960,7 @@ export function TkxMenu({
     // estimate height — will reflow, but good enough for initial position
     const estimatedH = Math.min(items.length * 38 + 12, 360);
     setMenuPos(calcMenuPosition(rect, placement, 220, estimatedH));
+    setInitialActive(active);
     setIsOpen(true);
     onOpen?.();
   }, [isDisabled, items.length, onOpen, placement]);
@@ -948,8 +968,14 @@ export function TkxMenu({
   const closeMenu = useCallback(() => {
     setIsOpen(false);
     onClose?.();
-    // return focus to trigger
-    (triggerRef.current?.firstElementChild as HTMLElement | null)?.focus?.();
+    // return focus to the trigger control (the cloned child, or the wrapper
+    // when the trigger was not an element)
+    const wrap = triggerRef.current;
+    const control = (wrap?.getAttribute('role') === 'button' ? wrap : wrap?.firstElementChild) as
+      | HTMLElement
+      | null
+      | undefined;
+    control?.focus?.();
   }, [onClose]);
 
   // Outside click
@@ -989,41 +1015,83 @@ export function TkxMenu({
     };
   }, [isOpen, items.length, placement]);
 
-  const handleTriggerKeyDown = (e: ReactKeyboardEvent<HTMLSpanElement>) => {
+  // APG menu button: Enter / Space / ArrowDown open with the FIRST item
+  // active, ArrowUp opens with the LAST item active (D9).
+  const handleTriggerKeyDown = (e: ReactKeyboardEvent<HTMLElement>) => {
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
       e.preventDefault();
-      if (!isOpen) openMenu();
-    }
-    if (e.key === 'Escape' && isOpen) {
+      if (!isOpen) openMenu('first');
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!isOpen) openMenu('last');
+    } else if (e.key === 'Escape' && isOpen) {
       e.preventDefault();
       closeMenu();
     }
   };
+
+  const handleTriggerClick = () => (isOpen ? closeMenu() : openMenu());
+
+  // D8: the caller's trigger element IS the menu button. Previously it was
+  // wrapped in a <span role="button" tabindex="0">, which nested a real
+  // <button> inside a role=button (axe `nested-interactive`) and gave one
+  // control two Tab stops. Now handlers + ARIA are cloned onto the element;
+  // a native <button>/<a> (or a component such as TkxButton that forwards to
+  // one) is already keyboard-operable, anything else is promoted with
+  // role="button"/tabIndex. Only a non-element trigger (plain text) falls back
+  // to the wrapper carrying the control role.
+  const controlAria = {
+    'aria-haspopup': 'menu' as const,
+    'aria-expanded': isOpen,
+    'aria-controls': isOpen ? menuId : undefined,
+    'aria-disabled': isDisabled || undefined,
+  };
+  const triggerIsElement = isValidElement(trigger);
+  const triggerProps = triggerIsElement
+    ? ((trigger as { props?: Record<string, unknown> }).props ?? {})
+    : {};
+  const triggerType = triggerIsElement ? (trigger as { type?: unknown }).type : undefined;
+  const triggerIsNative =
+    triggerType === 'button' ||
+    triggerType === 'a' ||
+    triggerProps.role === 'button' ||
+    triggerProps.tabIndex !== undefined ||
+    (typeof triggerType !== 'string' && triggerType !== undefined);
+
+  const control = triggerIsElement
+    ? cloneElement(trigger as ReactElement<Record<string, unknown>>, {
+        ...controlAria,
+        ...(isDisabled && triggerIsNative ? { disabled: true } : {}),
+        onClick: (e: ReactMouseEvent<HTMLElement>) => {
+          (triggerProps.onClick as ((ev: ReactMouseEvent<HTMLElement>) => void) | undefined)?.(e);
+          if (e.defaultPrevented) return;
+          handleTriggerClick();
+        },
+        onKeyDown: (e: ReactKeyboardEvent<HTMLElement>) => {
+          (triggerProps.onKeyDown as ((ev: ReactKeyboardEvent<HTMLElement>) => void) | undefined)?.(e);
+          if (e.defaultPrevented) return;
+          handleTriggerKeyDown(e);
+        },
+        ...(triggerIsNative ? {} : { role: 'button', tabIndex: isDisabled ? -1 : 0 }),
+      })
+    : trigger;
 
   return (
     <span
       ref={triggerRef}
       className={className}
       style={{ display: 'inline-flex', ...style }}
+      {...(triggerIsElement
+        ? {}
+        : {
+            role: 'button',
+            tabIndex: isDisabled ? -1 : 0,
+            onClick: handleTriggerClick,
+            onKeyDown: handleTriggerKeyDown,
+            ...controlAria,
+          })}
     >
-      <span
-        role="button"
-        tabIndex={isDisabled ? -1 : 0}
-        aria-haspopup="menu"
-        aria-expanded={isOpen}
-        aria-controls={isOpen ? menuId : undefined}
-        aria-disabled={isDisabled || undefined}
-        onClick={() => (isOpen ? closeMenu() : openMenu())}
-        onKeyDown={handleTriggerKeyDown}
-        style={{
-          display: 'inline-flex',
-          cursor: isDisabled ? 'not-allowed' : 'pointer',
-          opacity: isDisabled ? 0.55 : 1,
-          outline: 'none',
-        }}
-      >
-        {trigger}
-      </span>
+      {control}
 
       {isOpen && menuPos &&
         createPortal(
@@ -1033,6 +1101,7 @@ export function TkxMenu({
             panelId={menuId}
             onClose={closeMenu}
             onCloseAll={closeMenu}
+            initialActive={initialActive}
           />,
           document.body,
         )}

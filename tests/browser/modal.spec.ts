@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { gotoComponent, expectNoSeriousViolations, expectFocusTrapped, focusIsWithin, PORTAL_THEME_DEFECT } from './helpers';
+import { gotoComponent, expectNoSeriousViolations, expectFocusTrapped, focusIsWithin } from './helpers';
 
 // APG: Dialog (modal) — opening moves focus inside, Tab/Shift+Tab are trapped,
 // Escape closes and returns focus to the invoking element.
@@ -14,9 +14,6 @@ test.describe('Modal', () => {
     await page.getByRole('button', { name: 'Open modal', exact: true }).click();
     const dialog = page.getByRole('dialog').first();
     await expect(dialog).toBeVisible();
-    // DEFECT: see PORTAL_THEME_DEFECT in helpers.ts — the modal body text
-    // (and the <kbd> hint) render on the dark :root surface at ~1.05:1.
-    test.fixme(true, PORTAL_THEME_DEFECT);
     // The dialog is portalled outside the demo region — scan the dialog itself.
     await expectNoSeriousViolations(page, { include: '[role="dialog"]' });
   });

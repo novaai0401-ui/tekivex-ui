@@ -17,11 +17,18 @@ import { tkx, cx } from '../engine/tkx';
 
 export type CheckboxSize = 'sm' | 'md' | 'lg';
 
-export interface TkxCheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'> {
+export interface TkxCheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'type' | 'onChange'> {
   label?: ReactNode;
   hint?: string;
   isInvalid?: boolean;
   errorMessage?: string;
+  /**
+   * Fired when the checked state changes. The new checked state comes first
+   * so controlled usage can be `onChange={setChecked}`; the native event is
+   * second for consumers that need it.
+   */
+  onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Renders the mixed state: sets `input.indeterminate` and `aria-checked="mixed"`. */
   isIndeterminate?: boolean;
   size?: CheckboxSize;
   colorScheme?: 'primary' | 'success' | 'danger' | 'warning';
@@ -86,7 +93,8 @@ export const TkxCheckbox = forwardRef<HTMLInputElement, TkxCheckboxProps>(
     const isVisuallyChecked = isIndeterminate || (isChecked ?? false);
     const boxBg = isVisuallyChecked ? accentColor : theme.css.surface;
     const boxBorder = hasError ? theme.css.danger : isVisuallyChecked ? accentColor : theme.css.border;
-    const checkColor = getAccessibleForeground(accentColor);
+    // Contrast maths needs a literal hex, not the `var(--tkx-…)` reference.
+    const checkColor = getAccessibleForeground(theme.raw?.[colorScheme] ?? theme.raw?.primary ?? accentColor);
 
     const focusRingStyle: React.CSSProperties = isFocusVisible
       ? { outline: `2px solid ${accentColor}`, outlineOffset: '2px' }
@@ -134,8 +142,9 @@ export const TkxCheckbox = forwardRef<HTMLInputElement, TkxCheckboxProps>(
             type="checkbox"
             checked={checked}
             defaultChecked={defaultChecked}
-            onChange={onChange}
+            onChange={(e) => onChange?.(e.target.checked, e)}
             disabled={disabled}
+            aria-checked={isIndeterminate ? 'mixed' : undefined}
             aria-invalid={hasError}
             aria-describedby={describedBy}
             onFocus={(e) => {

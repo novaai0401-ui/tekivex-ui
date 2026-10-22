@@ -7,13 +7,6 @@ test.describe('DataGrid', () => {
   test.beforeEach(async ({ page }) => gotoComponent(page, 'data-grid'));
 
   test('axe: no serious/critical WCAG 2.1 AA violations', async ({ page }) => {
-    // DEFECT (TkxDataGrid): role="grid" is placed on the wrapper <div> and a
-    // native <table> is rendered inside it. A <table> (implicit role=table) is
-    // not a permitted child of grid → axe `aria-required-children` (critical) on
-    // every grid. Either move role="grid" onto the <table> or give the
-    // <table>/<tbody> role="presentation"/"rowgroup".
-    // Source: src/components/TkxDataGrid.tsx ~line 2006 (container div role=grid).
-    test.fixme(true, 'TkxDataGrid: <table> is a direct child of role=grid (aria-required-children)');
     await expectNoSeriousViolations(page);
   });
 

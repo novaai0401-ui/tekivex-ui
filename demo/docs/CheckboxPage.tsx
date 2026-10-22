@@ -13,7 +13,7 @@ const CHECKBOX_PROPS = [
   { name: 'label', type: 'string', required: true, description: 'Visible label text associated with the checkbox via htmlFor/id.' },
   { name: 'checked', type: 'boolean', default: 'undefined', description: 'Controlled checked state. Use with onChange for a controlled checkbox.' },
   { name: 'defaultChecked', type: 'boolean', default: 'false', description: 'Uncontrolled initial checked state.' },
-  { name: 'onChange', type: '(checked: boolean) => void', default: 'undefined', description: 'Callback fired when the checked state changes.' },
+  { name: 'onChange', type: '(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void', default: 'undefined', description: 'Callback fired when the checked state changes. The new checked state comes first (so onChange={setChecked} works); the native event second.' },
   { name: 'isIndeterminate', type: 'boolean', default: 'false', description: 'Renders the checkbox in an indeterminate (mixed) visual state. Sets aria-checked="mixed".' },
   { name: 'colorScheme', type: "'primary' | 'secondary' | 'danger' | 'warning' | 'success'", default: "'primary'", description: 'Theme color applied to the checked/indeterminate fill.' },
   { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Controls the checkbox width, height, and label font size.' },

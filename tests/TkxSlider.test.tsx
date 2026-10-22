@@ -69,4 +69,20 @@ describe('TkxSlider', () => {
     expect(sliders[0]).toHaveAttribute('aria-valuetext', '10%');
     expect(sliders[1]).toHaveAttribute('aria-valuetext', '80%');
   });
+
+  // ── D16: aria-valuenow is clamped into [min, max] ─────────────────────────
+
+  it('clamps an out-of-range value into [min, max] for aria-valuenow', () => {
+    const { rerender } = render(<TkxSlider value={50} min={16} max={32} />, { wrapper: Wrapper });
+    expect(screen.getByRole('slider')).toHaveAttribute('aria-valuenow', '32');
+    rerender(<TkxSlider value={-5} min={16} max={32} />);
+    expect(screen.getByRole('slider')).toHaveAttribute('aria-valuenow', '16');
+  });
+
+  it('clamps range thumbs into [min, max]', () => {
+    render(<TkxSlider isRange rangeValue={[-10, 500]} min={0} max={100} />, { wrapper: Wrapper });
+    const sliders = screen.getAllByRole('slider');
+    expect(sliders[0]).toHaveAttribute('aria-valuenow', '0');
+    expect(sliders[1]).toHaveAttribute('aria-valuenow', '100');
+  });
 });

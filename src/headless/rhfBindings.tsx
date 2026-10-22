@@ -160,7 +160,7 @@ export function createRHFBindings(config: CreateRHFBindingsConfig): RHFBindings 
           {...rest}
           name={field.name}
           checked={Boolean(field.value)}
-          onChange={(e) => field.onChange((e.target as HTMLInputElement).checked)}
+          onChange={(checked) => field.onChange(checked)}
           onBlur={field.onBlur}
           ref={field.ref as unknown as React.Ref<HTMLInputElement>}
           errorMessage={fieldState.error?.message}

@@ -69,29 +69,31 @@ to pass.
 
 | Component  | Tests | Chromium | Firefox | WebKit | fixme reason(s) |
 |------------|:-----:|:--------:|:-------:|:------:|-----------------|
-| Button     | 3 | 2 pass / 1 fixme | 2 / 1 | 2 / 1 | D1 warning-scheme contrast |
+| Button     | 3 | 3 pass | 3 pass | 3 pass | — (D1 fixed; demo-authored inline brand buttons excluded) |
 | Input      | 3 | 3 pass | 3 pass | 3 pass | — |
-| Select     | 3 | 2 / 1 | 2 / 1 | 2 / 1 | D2 aria-multiselectable on combobox + placeholder contrast |
-| Checkbox   | 4 | 3 / 1 | 3 / 1 | 3 / 1 | D3 onChange contract — cannot uncheck |
-| Radio      | 3 | 1 / 2 | 0 / 3 | 1 / 2 | D4 name="" (Tab stops; Firefox also loses arrows), D5 hint contrast |
-| Toggle     | 3 | 3 pass | 3 pass | 3 pass | — (TkxBadge excluded, see D13) |
+| Select     | 3 | 3 pass | 3 pass | 3 pass | — (D2 fixed) |
+| Checkbox   | 4 | 4 pass | 4 pass | 4 pass | — (D3 fixed; also asserts `aria-checked="mixed"`) |
+| Radio      | 3 | 3 pass | 3 pass | 3 pass | — (D4, D5 fixed) |
+| Toggle     | 3 | 3 pass | 3 pass | 3 pass | — (TkxBadge now scanned, D13 fixed) |
 | Textarea   | 3 | 3 pass | 3 pass | 3 pass | — |
-| Modal      | 3 | 2 / 1 | 2 / 1 | 2 / 1 | D6 portal theme (open-state axe) |
-| Drawer     | 3 | 2 / 1 | 2 / 1 | 2 / 1 | D6 |
-| Popover    | 4 | 1 / 3 | 1 / 3 | 1 / 3 | D7 nested-interactive trigger (×2), D6 |
+| Modal      | 3 | 3 pass | 3 pass | 3 pass | — (D6 fixed) |
+| Drawer     | 3 | 3 pass | 3 pass | 3 pass | — (D6 fixed) |
+| Popover    | 4 | 4 pass | 4 pass | 4 pass | — (D6, D7 fixed) |
 | Tooltip    | 2 | 2 pass | 2 pass | 2 pass | — |
 | Tabs       | 3 | 3 pass | 3 pass | 3 pass | — |
 | Accordion  | 2 | 2 pass | 2 pass | 2 pass | — |
-| Menu       | 5 | 1 / 4 | 1 / 4 | 1 / 4 | D8 nested-interactive trigger (×2), D9 no active item on open, D6 |
+| Menu       | 5 | 5 pass | 5 pass | 5 pass | — (D6, D8, D9 fixed) |
 | Breadcrumb | 4 | 2 / 2 | 2 / 2 | 2 / 2 | D10 "…" not in listitem, D11 focus lost after expand |
 | Pagination | 2 | 2 pass | 2 pass | 2 pass | — |
-| Table      | 3 | 3 pass | 3 pass | 3 pass | — (TkxBadge excluded, see D13) |
-| DataGrid   | 2 | 1 / 1 | 1 / 1 | 1 / 1 | D12 `<table>` child of role=grid |
-| DatePicker | 4 | 1 / 3 | 1 / 3 | 1 / 3 | D14 aria-expanded on textbox, D15 no grid roles, D6 |
-| Slider     | 3 | 2 / 1 | 2 / 1 | 2 / 1 | D16 aria-valuenow not clamped |
-| **Total**  | 62 | **41 pass / 21 fixme / 0 fail** | **40 / 22 / 0** | **41 / 21 / 0** | |
+| Table      | 3 | 3 pass | 3 pass | 3 pass | — (TkxBadge now scanned, D13 fixed) |
+| DataGrid   | 2 | 2 pass | 2 pass | 2 pass | — (D12 fixed) |
+| DatePicker | 4 | 4 pass | 4 pass | 4 pass | — (D6, D14, D15 fixed) |
+| Slider     | 3 | 3 pass | 3 pass | 3 pass | — (D16 fixed) |
+| **Total**  | 62 | **62 pass / 0 fixme / 0 fail** | **62 / 0 / 0** | **62 / 0 / 0** | consolidated re-run 2026-10-22 after all 16 fixes: 186/186, no retries needed |
 
 Keyboard behaviour that passed in all three browsers: Button Enter/Space;
+Menu Enter/Space/ArrowDown open with first item active and ArrowUp with last
+(D9); Popover and Menu triggers are a single Tab stop (D7/D8);
 Select ArrowDown/Enter/Escape with `aria-activedescendant`; Checkbox Space (and
 Enter ignored) + indeterminate parent; Radio arrows (Chromium/WebKit); Switch
 Space/Enter; Modal and Drawer open → focus moved in → Tab/Shift+Tab trapped →
@@ -109,22 +111,22 @@ Each is reproduced in Chromium, Firefox and WebKit unless stated.
 
 | # | Component | Defect | Where |
 |---|-----------|--------|-------|
-| D1 | TkxButton / theme | `colorScheme="warning"` paints white text on `--tkx-warning` (#d4a017): **2.37:1** (serious). | `src/components/TkxButton.tsx` (solid variant text colour); warning token default |
-| D2 | TkxSelect | `aria-multiselectable` set on the `<button role="combobox">` trigger (**critical** `aria-allowed-attr`); placeholder rendered at `opacity:.6` → #a6a3a0 on #fff **2.5:1**. | `src/components/TkxSelect.tsx` ~L1037 (trigger props); placeholder `<span>` |
-| D3 | TkxCheckbox (API/doc) | Docs + demo declare `onChange: (checked: boolean) => void` and wire `onChange={setChecked}`, but the component forwards the native `ChangeEvent`; controlled state becomes the truthy event so **a checked box can never be unchecked** (keyboard or mouse). Docs also claim `aria-checked="mixed"` is applied for indeterminate; it is not (only `input.indeterminate`). | `src/components/TkxCheckbox.tsx:137`; `demo/docs/CheckboxPage.tsx:16,126,281,323` |
-| D4 | TkxRadioGroup | Radios render `name=""` (`radioName = nameProp ?? group?.name ?? ''`); group never generates a name. Tab stops on every radio (APG: one stop per group) in all browsers; in **Firefox** arrow keys also do nothing. | `src/components/TkxRadio.tsx:83` |
-| D5 | TkxRadio | `hint` text at 12px under opacity → #b5b2b0 on #fff **2.1:1**. | `src/components/TkxRadio.tsx` (hint span) |
-| D6 | ThemeProvider / all portalled overlays | ThemeProvider inserts its `:root { --tkx-* }` `<style id="tkx-theme">` **before** every other stylesheet, so the Quantum-Dark `:root` defaults in `src/styles/global.css:11` win for anything outside the provider's wrapper `<div>` — i.e. everything rendered with `createPortal` into `<body>`. In the light theme the Modal, Drawer, Popover, Menu and DatePicker panels paint `#12121a` under light-theme text: modal body text **1.05:1**, popover title 1.05:1, drawer labels 1.05:1, menu shortcut hints 3.89:1, calendar outside-month days 1.12:1. Visually confirmed (dark modal with invisible body text). | `src/themes/index.ts:492-500`; `src/styles/global.css:11`; `TkxModal.tsx:61`, `TkxPopover.tsx`, `TkxDrawer.tsx`, `TkxMenu.tsx`, `TkxDatePicker.tsx` |
-| D7 | TkxPopover | Trigger is `<div role="button" tabindex="0">` wrapping the caller's `<button>`: axe `nested-interactive` (serious) and **two Tab stops** for one control. | `src/components/TkxPopover.tsx` ~L290 |
-| D8 | TkxMenu | Same as D7 with `<span role="button" tabindex="0" aria-haspopup="menu">`. | `src/components/TkxMenu.tsx` ~L1040 |
-| D9 | TkxMenu | Enter/Space/ArrowDown open the menu with **no active item** (`aria-activedescendant` unset until a further ArrowDown). APG: first item must become active on open. | `src/components/TkxMenu.tsx` ~L1032 (`handleTriggerKeyDown` / `openMenu`) |
-| D10 | TkxBreadcrumb | With `maxItems`, the "…" `<button>` sits in an `<li role="presentation">`, leaving `<ol role="list">` with a non-listitem child: **critical** `aria-required-children`. | `src/components/TkxBreadcrumb.tsx` (collapsed `<li role="presentation">`) |
-| D11 | TkxBreadcrumb | Activating "…" removes the button without moving focus → `document.activeElement` becomes `<body>` (WCAG 2.4.3). | `src/components/TkxBreadcrumb.tsx` ~L122 (`setExpanded`) |
-| D12 | TkxDataGrid | `role="grid"` is on the wrapper `<div>` with a native `<table>` inside; `<table>` is not a permitted child of `grid`: **critical** `aria-required-children` on every grid. | `src/components/TkxDataGrid.tsx` ~L2006 |
-| D13 | TkxBadge (not in the 20, surfaced via Toggle/Table demos) | `variant="default"` paints white on `--tkx-border` (#ddd8cc) **1.42:1**; `variant="warning"` white on #d4a017 **2.37:1**. Excluded from the Toggle/Table scans with a comment. | `src/components/TkxBadge.tsx` |
-| D14 | TkxDatePicker | Text `<input>` carries `aria-expanded`/`aria-haspopup` without `role="combobox"`: **critical** `aria-allowed-attr` on every instance. | `src/components/TkxDatePicker.tsx` ~L1750 |
-| D15 | TkxDatePicker | Calendar is `<div>`s + day `<button>`s with no `grid`/`row`/`gridcell`/`columnheader` roles (APG date-picker dialog requires a grid); day buttons use `aria-pressed` instead of `aria-selected`. Also opens on plain focus. | `src/components/TkxDatePicker.tsx` ~L1480-1520 |
-| D16 | TkxSlider (+ demo) | `aria-valuenow` is published unclamped; the "Custom Min / Max / Step" demo passes value 50 for min 16 / max 32 and the slider announces 50. | `src/components/TkxSlider.tsx` (`aria-valuenow={value}`); `demo/docs/SliderPage.tsx:35,165-166` |
+| D1 | TkxButton / theme | **fixed** — `getAccessibleForeground` was fed `theme.css.warning` (`var(--tkx-warning, …)`), which the hex parser decodes as black, so every scheme got white; the button now resolves the accent via `theme.raw` (or the `var()` fallback literal) before the contrast check, giving dark text on the warning token. | `src/components/TkxButton.tsx` |
+| D2 | TkxSelect | **fixed** — `aria-multiselectable` removed from the `role="combobox"` trigger (it stays on the listbox); placeholder painted in `textMuted` with no extra opacity. | `src/components/TkxSelect.tsx` |
+| D3 | TkxCheckbox (API/doc) | **fixed** — `onChange` is now `(checked: boolean, event: ChangeEvent) => void` (boolean first, matching the documented contract; event second), so `onChange={setChecked}` can uncheck; `isIndeterminate` sets `aria-checked="mixed"` in addition to `input.indeterminate`. | `src/components/TkxCheckbox.tsx`; `demo/docs/CheckboxPage.tsx`; `docs-site/.../checkbox.mdx`; `src/headless/rhfBindings.tsx` (call site) |
+| D4 | TkxRadioGroup | **fixed** — `name` is optional and falls back to a `useId()`-based group name, so radios form one native group (one Tab stop; Firefox arrow keys work). | `src/components/TkxRadio.tsx` |
+| D5 | TkxRadio | **fixed** — the disabled `opacity: .5` moved from the wrapper to the control+label row, so a disabled radio's hint keeps the full `textMuted` colour (5.3:1 on the light theme). | `src/components/TkxRadio.tsx` |
+| D6 | ThemeProvider / all portalled overlays | **fixed** — was: ThemeProvider inserted its `:root { --tkx-* }` `<style id="tkx-theme">` **before** every other stylesheet, so the Quantum-Dark `:root` defaults in `src/styles/global.css:11` won for anything outside the provider's wrapper `<div>` (everything `createPortal`'d into `<body>`): light-theme Modal/Drawer/Popover/Menu/DatePicker panels painted `#12121a` under light text (1.05:1). Fix: the provider now appends `#tkx-theme` as the **last** child of `<head>` (re-appended on every theme change) and emits the block as `:root:root` (0,2,0) so it also beats a plain `:root` sheet injected after mount; SSR/`themeInitScript` paths untouched. Regression tests in `tests/ThemeProvider.test.tsx` ("D6"). Menu shortcut hints additionally dropped the extra `opacity:.8` (3.69:1 → ~5.7:1 on white). | `src/themes/index.ts` (`useIsomorphicLayoutEffect`), `src/components/TkxMenu.tsx` (shortcut span) |
+| D7 | TkxPopover | **fixed** — was: trigger wrapped in `<div role="button" tabindex="0">` around the caller's `<button>` (`nested-interactive`, two Tab stops). Fix: handlers + `aria-haspopup/expanded/controls` are `cloneElement`'d onto the trigger element itself; the wrapper is a role-less positioning `<div>`. Native `<button>`/`<a>` and components (TkxButton) stay as-is; non-interactive elements get `role="button"`/`tabIndex=0`/Enter-Space; only non-element children fall back to the wrapper being the control. | `src/components/TkxPopover.tsx` (trigger section) |
+| D8 | TkxMenu | **fixed** — same approach as D7: the `<span role="button" tabindex="0">` wrapper is gone; ARIA + `onClick`/`onKeyDown` are cloned onto the trigger element (caller's own handlers still run first; `disabled` is forwarded to native triggers). | `src/components/TkxMenu.tsx` (`TkxMenu` trigger) |
+| D9 | TkxMenu | **fixed** — was: Enter/Space/ArrowDown opened with **no active item**. Fix: `openMenu('first' \| 'last')` passes `initialActive` to `MenuPanel`, which seeds `activeIdx` with the first (Enter/Space/ArrowDown) or last (ArrowUp, newly handled) non-disabled item so `aria-activedescendant` is set on open; pointer opens still start with no active item. | `src/components/TkxMenu.tsx` (`handleTriggerKeyDown`, `openMenu`, `MenuPanel.initialActive`) |
+| D10 | TkxBreadcrumb | **Fixed.** The "…" button now renders in a plain `<li>` (no `role="presentation"`), so every child of `<ol role="list">` is a listitem (separators stay `role="presentation" aria-hidden`). | `src/components/TkxBreadcrumb.tsx` |
+| D11 | TkxBreadcrumb | **Fixed.** Expanding "…" records the first hidden item's index and a post-render effect focuses that item's link/button (`data-tkx-breadcrumb-index`), so focus never drops to `<body>`. | `src/components/TkxBreadcrumb.tsx` |
+| D12 | TkxDataGrid | **Fixed.** `role="grid"`/`"treegrid"`, `aria-label`, `aria-rowcount`/`aria-colcount`, the id and the keyboard/focus handlers moved from the wrapper `<div>` onto the `<table>` itself; native `thead`/`tbody`/`tr`/`th`/`td` plus the explicit `row`/`columnheader`/`gridcell`/`rowheader` roles and all `aria-level`/`aria-expanded`/`aria-controls` wiring are unchanged. Toolbar and pagination now sit outside the grid. | `src/components/TkxDataGrid.tsx` |
+| D13 | TkxBadge (not in the 20, surfaced via Toggle/Table demos) | **fixed** — same root cause as D1 but the badge is RSC-safe (no theme context), so the foreground is now computed by CSS from the resolved token (`rgb(from var(--tkx-…) …)` with the WCAG luminance threshold): dark on `border`/`warning`, white on dark tokens. Toggle/Table scans no longer exclude it. | `src/components/TkxBadge.tsx` |
+| D14 | TkxDatePicker | **Fixed.** The input carries `role="combobox"`, `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls` → dialog id (APG combobox + dialog). | `src/components/TkxDatePicker.tsx` |
+| D15 | TkxDatePicker | **Fixed.** Calendar is a `<table role="grid" aria-labelledby={month heading}>` with `<th role="columnheader" abbr={long weekday}>`, one `<tr role="row">` per week and `<td role="gridcell" aria-selected aria-current="date">` wrapping each day button (`aria-pressed` removed). Roving tabindex + Arrow keys kept; Home/End (week start/end) and PageUp/PageDown (±month, Shift ±year) added. The picker no longer opens on plain focus — only on click, Enter, ArrowDown or the calendar button. | `src/components/TkxDatePicker.tsx` |
+| D16 | TkxSlider (+ demo) | **Fixed.** Single and range values are clamped into `[min, max]` before rendering, so `aria-valuenow`, the fill and the thumb position never exceed the bounds; the "Custom Min / Max / Step" demo now starts at 22 (16..32). | `src/components/TkxSlider.tsx`; `demo/docs/SliderPage.tsx` |
 
 Demo-authored (not component) issues excluded in specs with reasons:
 Button "Custom CSS Override" inline backgrounds; Tooltip "Rich Tooltips" inline

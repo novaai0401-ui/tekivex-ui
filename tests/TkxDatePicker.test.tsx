@@ -928,12 +928,18 @@ describe('TkxDatePicker', () => {
       vi.useRealTimers();
     });
 
+    // The calendar is a <table role="grid">: weekday names are the
+    // role="columnheader" cells of its header row.
     function getWeekdayHeaderCells(dlg: HTMLElement): HTMLElement[] {
-      const fmt = new Intl.DateTimeFormat('en-US', { weekday: 'short' });
-      const labels = Array.from({ length: 7 }, (_, i) => fmt.format(new Date(2023, 0, 1 + i)));
-      return (Array.from(dlg.querySelectorAll('div')) as HTMLElement[]).filter(
-        (el) => el.children.length === 0 && labels.includes(el.textContent ?? ''),
-      );
+      return Array.from(dlg.querySelectorAll('[role="grid"] [role="columnheader"]')) as HTMLElement[];
+    }
+
+    // Column index of a day button inside its <tr role="row"> (the button
+    // sits in a <td role="gridcell">).
+    function columnOf(dayButton: HTMLElement): number {
+      const cell = dayButton.closest('[role="gridcell"]') as HTMLElement;
+      const row = cell.parentElement as HTMLElement;
+      return Array.from(row.children).indexOf(cell);
     }
 
     it('default (weekStartsOn=0): first weekday column is Sunday', () => {
@@ -962,12 +968,10 @@ describe('TkxDatePicker', () => {
       const { container } = wrap(<TkxDatePicker weekStartsOn={1} label="X" />);
       openPicker(getInput(container));
       const may1 = getDayByLabel(2026, 4, 1);
-      const grid = may1.parentElement as HTMLElement;
-      const idx = Array.from(grid.children).indexOf(may1);
       // Monday-first week: Mon=0 … Fri=4.
-      expect(idx % 7).toBe(4);
+      expect(columnOf(may1)).toBe(4);
       // The grid should start with the previous month's Monday, Apr 27 2026.
-      const firstCell = grid.children[0] as HTMLElement;
+      const firstCell = getDialog()!.querySelector('[role="grid"] tbody [role="gridcell"] button') as HTMLElement;
       expect(firstCell).toBe(queryDayByLabel(2026, 3, 27));
     });
 
@@ -975,9 +979,7 @@ describe('TkxDatePicker', () => {
       const { container } = wrap(<TkxDatePicker label="X" />);
       openPicker(getInput(container));
       const may1 = getDayByLabel(2026, 4, 1);
-      const grid = may1.parentElement as HTMLElement;
-      const idx = Array.from(grid.children).indexOf(may1);
-      expect(idx % 7).toBe(5);
+      expect(columnOf(may1)).toBe(5);
     });
 
     it('keyboard navigation still works with weekStartsOn={1}', () => {
@@ -1080,6 +1082,81 @@ describe('TkxDatePicker', () => {
       const { container } = wrap(<TkxDatePicker />);
       openPicker(getInput(container));
       expect(getDialog()!.getAttribute('aria-label')).toBe('Date picker');
+    });
+  });
+
+  // ── A11y: combobox + grid semantics (browser-matrix D14 / D15) ───────────
+  describe('a11y: combobox role and calendar grid roles', () => {
+    it('D14: the input is a combobox with aria-haspopup="dialog" and aria-controls when open', () => {
+      const { container } = wrap(<TkxDatePicker label="X" />);
+      const input = getInput(container);
+      expect(input.getAttribute('role')).toBe('combobox');
+      expect(input.getAttribute('aria-haspopup')).toBe('dialog');
+      expect(input.getAttribute('aria-expanded')).toBe('false');
+      openPicker(input);
+      expect(input.getAttribute('aria-expanded')).toBe('true');
+      expect(input.getAttribute('aria-controls')).toBe(getDialog()!.id);
+    });
+
+    it('D15: does not open on plain focus; opens on click, Enter and the calendar button', () => {
+      const { container } = wrap(<TkxDatePicker label="X" />);
+      const input = getInput(container);
+      fireEvent.focus(input);
+      expect(getDialog()).toBeNull();
+      fireEvent.click(input);
+      expect(getDialog()).not.toBeNull();
+      act(() => {
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+      });
+      expect(getDialog()).toBeNull();
+      fireEvent.keyDown(input, { key: 'Enter' });
+      expect(getDialog()).not.toBeNull();
+    });
+
+    it('D15: calendar exposes grid/row/columnheader/gridcell roles named by the month heading', () => {
+      const { container } = wrap(
+        <TkxDatePicker value={new Date(2026, 4, 15)} onChange={() => {}} label="X" />,
+      );
+      openPicker(getInput(container));
+      const dlg = getDialog()!;
+      const grid = dlg.querySelector('[role="grid"]') as HTMLElement;
+      expect(grid).not.toBeNull();
+      expect(grid.tagName).toBe('TABLE');
+      const heading = document.getElementById(grid.getAttribute('aria-labelledby')!)!;
+      expect(heading.textContent).toContain('May');
+      expect(heading.textContent).toContain('2026');
+      expect(grid.querySelectorAll('[role="columnheader"]').length).toBe(7);
+      const rows = grid.querySelectorAll('tbody [role="row"]');
+      expect(rows.length).toBeGreaterThanOrEqual(4);
+      rows.forEach((r) => expect(r.querySelectorAll('[role="gridcell"]').length).toBe(7));
+    });
+
+    it('D15: selected day uses aria-selected on its gridcell (no aria-pressed on the button)', () => {
+      const { container } = wrap(
+        <TkxDatePicker value={new Date(2026, 4, 15)} onChange={() => {}} label="X" />,
+      );
+      openPicker(getInput(container));
+      const day = getDayByLabel(2026, 4, 15);
+      expect(day.hasAttribute('aria-pressed')).toBe(false);
+      expect(day.closest('[role="gridcell"]')!.getAttribute('aria-selected')).toBe('true');
+      expect(getDayByLabel(2026, 4, 16).closest('[role="gridcell"]')!.getAttribute('aria-selected')).toBe('false');
+    });
+
+    it('D15: Home/End move to the start/end of the week; PageUp/PageDown move by a month', () => {
+      const { container } = wrap(
+        <TkxDatePicker value={new Date(2026, 4, 15)} onChange={() => {}} label="X" />,
+      );
+      openPicker(getInput(container));
+      const dlg = getDialog()!;
+      getDayByLabel(2026, 4, 15).focus(); // Friday 15 May 2026
+      fireEvent.keyDown(dlg, { key: 'Home' });
+      expect(document.activeElement).toBe(getDayByLabel(2026, 4, 10)); // Sunday
+      fireEvent.keyDown(dlg, { key: 'End' });
+      expect(document.activeElement).toBe(getDayByLabel(2026, 4, 16)); // Saturday
+      fireEvent.keyDown(dlg, { key: 'PageDown' });
+      expect(document.activeElement).toBe(getDayByLabel(2026, 5, 16)); // 16 June
+      fireEvent.keyDown(dlg, { key: 'PageUp' });
+      expect(document.activeElement).toBe(getDayByLabel(2026, 4, 16));
     });
   });
 

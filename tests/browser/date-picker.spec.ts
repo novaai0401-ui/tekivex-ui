@@ -1,15 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { gotoComponent, expectNoSeriousViolations, PORTAL_THEME_DEFECT } from './helpers';
+import { gotoComponent, expectNoSeriousViolations } from './helpers';
 
 // APG: Date picker dialog — ArrowDown from the input moves focus into the
 // calendar, arrow keys move by day/week, Enter selects and closes, Escape
 // closes and returns focus to the input.
-
-// DEFECT (TkxDatePicker): the text <input> carries aria-expanded (and
-// aria-haspopup) without role="combobox". aria-expanded is not permitted on
-// the textbox role → axe `aria-allowed-attr` (critical) on every instance.
-// Source: src/components/TkxDatePicker.tsx ~line 1750 (input props).
-const DP_AXE_DEFECT = 'TkxDatePicker input has aria-expanded without role=combobox (aria-allowed-attr)';
 
 const INPUT = 'main input[aria-haspopup="dialog"]';
 
@@ -17,7 +11,6 @@ test.describe('DatePicker', () => {
   test.beforeEach(async ({ page }) => gotoComponent(page, 'date-picker'));
 
   test('axe: no serious/critical WCAG 2.1 AA violations (closed)', async ({ page }) => {
-    test.fixme(true, DP_AXE_DEFECT);
     await expectNoSeriousViolations(page);
   });
 
@@ -26,9 +19,6 @@ test.describe('DatePicker', () => {
     await input.focus();
     await page.keyboard.press('ArrowDown');
     await expect(page.getByRole('dialog').first()).toBeVisible();
-    // DEFECT: see PORTAL_THEME_DEFECT in helpers.ts — outside-month day
-    // buttons render #000 on #12121a (1.12:1).
-    test.fixme(true, PORTAL_THEME_DEFECT);
     await expectNoSeriousViolations(page, { include: '[role="dialog"]' });
   });
 
@@ -73,12 +63,6 @@ test.describe('DatePicker', () => {
   });
 
   test('a11y: calendar exposes grid semantics (role=grid/row/gridcell)', async ({ page }) => {
-    // DEFECT (TkxDatePicker): the calendar is a flex layout of <div>s and day
-    // <button>s with no grid/row/gridcell/columnheader roles, so AT cannot
-    // announce row/column position (APG date-picker dialog requires a grid).
-    // Day buttons also expose aria-pressed instead of aria-selected.
-    // Source: src/components/TkxDatePicker.tsx ~line 1480-1520 (weekday header + day buttons).
-    test.fixme(true, 'TkxDatePicker calendar has no grid/row/gridcell roles');
     const input = page.locator(INPUT).first();
     await input.focus();
     await page.keyboard.press('ArrowDown');

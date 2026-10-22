@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { useState } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TkxCheckbox } from '../src/components/TkxCheckbox';
 import { ThemeProvider, quantumDark } from '../src/themes';
@@ -23,6 +24,40 @@ describe('TkxCheckbox', () => {
     render(<TkxCheckbox label="Toggle" onChange={onChange} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByRole('checkbox'));
     expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  // D3: the documented contract is boolean-first; the event rides second.
+  it('onChange receives (checked: boolean, event)', () => {
+    const onChange = vi.fn();
+    render(<TkxCheckbox label="Toggle" onChange={onChange} />, { wrapper: Wrapper });
+    fireEvent.click(screen.getByRole('checkbox'));
+    expect(onChange.mock.calls[0][0]).toBe(true);
+    expect(onChange.mock.calls[0][1]).toMatchObject({ target: expect.anything() });
+  });
+
+  it('controlled usage with onChange={setChecked} can uncheck', () => {
+    function Controlled() {
+      const [checked, setChecked] = useState(false);
+      return <TkxCheckbox label="Ctl" checked={checked} onChange={setChecked} />;
+    }
+    render(<Controlled />, { wrapper: Wrapper });
+    const box = screen.getByRole('checkbox');
+    fireEvent.click(box);
+    expect(box).toBeChecked();
+    fireEvent.click(box);
+    expect(box).not.toBeChecked();
+  });
+
+  it('sets aria-checked="mixed" and input.indeterminate when isIndeterminate', () => {
+    render(<TkxCheckbox label="Mixed" isIndeterminate />, { wrapper: Wrapper });
+    const box = screen.getByRole('checkbox') as HTMLInputElement;
+    expect(box).toHaveAttribute('aria-checked', 'mixed');
+    expect(box.indeterminate).toBe(true);
+  });
+
+  it('does not set aria-checked when not indeterminate', () => {
+    render(<TkxCheckbox label="Plain" />, { wrapper: Wrapper });
+    expect(screen.getByRole('checkbox')).not.toHaveAttribute('aria-checked');
   });
 
   it('reflects checked state', () => {

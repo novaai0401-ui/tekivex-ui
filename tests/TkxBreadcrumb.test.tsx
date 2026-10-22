@@ -46,4 +46,39 @@ describe('TkxBreadcrumb', () => {
     fireEvent.click(screen.getByText('Home'));
     expect(onNavigate).toHaveBeenCalledWith(items[0], 0);
   });
+
+  // ── maxItems collapse (browser-matrix D10 / D11) ───────────────────────────
+
+  const many: BreadcrumbItem[] = [
+    { label: 'Home', href: '/' },
+    { label: 'Docs', href: '/docs' },
+    { label: 'Components', href: '/docs/components' },
+    { label: 'Breadcrumb', href: '/docs/components/breadcrumb' },
+    { label: 'Usage' },
+  ];
+
+  it('D10: the "…" control sits in a real <li> (every <ol> child is a listitem)', () => {
+    render(<TkxBreadcrumb items={many} maxItems={3} />, { wrapper: Wrapper });
+    const ellipsis = screen.getByRole('button', { name: 'Show hidden breadcrumb items' });
+    const li = ellipsis.closest('li')!;
+    expect(li).not.toHaveAttribute('role');
+    const list = screen.getByRole('list');
+    // Separators are presentational + hidden; everything else is a listitem.
+    Array.from(list.children).forEach((child) => {
+      expect(child.tagName).toBe('LI');
+      if (child.getAttribute('role') === 'presentation') {
+        expect(child).toHaveAttribute('aria-hidden', 'true');
+      }
+    });
+  });
+
+  it('D11: activating "…" moves focus to the first revealed item', () => {
+    render(<TkxBreadcrumb items={many} maxItems={3} />, { wrapper: Wrapper });
+    const ellipsis = screen.getByRole('button', { name: 'Show hidden breadcrumb items' });
+    ellipsis.focus();
+    fireEvent.click(ellipsis);
+    expect(screen.queryByRole('button', { name: 'Show hidden breadcrumb items' })).toBeNull();
+    // maxItems=3 → head=1 ("Home"), so the first hidden item is "Docs".
+    expect(document.activeElement).toBe(screen.getByText('Docs').closest('a'));
+  });
 });

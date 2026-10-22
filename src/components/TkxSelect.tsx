@@ -1039,7 +1039,6 @@ export function TkxSelect({
           aria-label={label ? undefined : placeholderName}
           aria-invalid={hasError || undefined}
           aria-describedby={describedBy}
-          aria-multiselectable={searchOwnsCombobox ? undefined : multiple}
           disabled={isDisabled}
           onKeyDown={handleTriggerKeyDown}
           style={{
@@ -1084,7 +1083,9 @@ export function TkxSelect({
               );
             })()
           ) : multiple && selectedOptionObjects.length > 0 ? null : (
-            <span style={{ opacity: 0.6 }}>
+            // Placeholder: textMuted with no extra opacity (0.6 dropped the
+            // light theme to 2.5:1).
+            <span style={{ color: theme.css.textMuted }}>
               {sanitizeString(resolvedPlaceholder)}
             </span>
           )}

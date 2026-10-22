@@ -119,6 +119,19 @@ function getWeekdayShortLabels(locale: string): string[] {
 
 // ── Date helpers ──────────────────────────────────────────────────────────────
 
+const weekdayLongLabelsCache = new Map<string, string[]>();
+
+/** Localized long weekday names, Sunday-first (index 0=Sunday ... 6=Saturday). */
+function getWeekdayLongLabels(locale: string): string[] {
+  let labels = weekdayLongLabelsCache.get(locale);
+  if (!labels) {
+    const fmt = makeDateTimeFormat(locale, { weekday: 'long' });
+    labels = Array.from({ length: 7 }, (_, i) => fmt.format(new Date(2023, 0, 1 + i)));
+    weekdayLongLabelsCache.set(locale, labels);
+  }
+  return labels;
+}
+
 function isSameDay(a: Date, b: Date): boolean {
   return (
     a.getFullYear() === b.getFullYear() &&
@@ -514,7 +527,11 @@ interface CalendarMonthProps {
   theme: ReturnType<typeof import('../themes').useTheme>;
   locale: string;
   weekdayLabels: string[];
+  /** Localized long weekday names (Sunday-first), used for column header `abbr`. */
+  weekdayLongLabels: string[];
   weekStartsOn: WeekStartsOn;
+  /** id of the visible month/year heading that names this grid. */
+  labelId: string;
   /** The single date whose cell is in the Tab order (roving tabindex). */
   rovingDate: Date;
   /** Registers current-month day-cell buttons so the parent can move DOM focus. */
@@ -543,147 +560,166 @@ function CalendarMonth({
   theme,
   locale,
   weekdayLabels,
+  weekdayLongLabels,
   weekStartsOn,
+  labelId,
   rovingDate,
   registerDayRef,
 }: CalendarMonthProps) {
   const cells = getCalendarGrid(year, month, weekStartsOn);
+  // Split the flat day list into weeks: one <tr role="row"> per week (APG
+  // date-picker dialog: the calendar is a grid of rows and gridcells).
+  const weeks: Date[][] = [];
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 
   return (
-    <div>
+    <table
+      role="grid"
+      aria-labelledby={labelId}
+      style={{ borderCollapse: 'separate', borderSpacing: '2px', tableLayout: 'fixed' }}
+    >
       {/* Day-of-week header */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-          gap: '2px',
-          marginBottom: '4px',
-        }}
-      >
-        {Array.from({ length: 7 }, (_, i) => weekdayLabels[(weekStartsOn + i) % 7]).map((d, i) => (
-          <div
-            key={`${d}-${i}`}
-            style={{
-              textAlign: 'center',
-              fontSize: '11px',
-              fontWeight: 600,
-              color: theme.css.textMuted,
-              padding: '4px 0',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-            }}
-          >
-            {d}
-          </div>
-        ))}
-      </div>
-
-      {/* Day grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
-        {cells.map((cell, idx) => {
-          const isCurrentMonth = cell.getMonth() === month;
-          const isToday = isSameDay(cell, today);
-          const isWeekend = cell.getDay() === 0 || cell.getDay() === 6;
-          const disabled = isDateDisabled(cell);
-
-          const isSelectedSingle = mode === 'single' && selectedDate != null && isSameDay(cell, selectedDate);
-          const isMultiSelected = mode === 'multiple' && multiDates.some((d) => isSameDay(d, cell));
-          const isRangeStart = mode === 'range' && isRangeEndpoint(cell, selectedRange[0], null);
-          const isRangeEnd = mode === 'range' && isRangeEndpoint(cell, null, selectedRange[1]);
-          const isRangeEndpt = isRangeStart || isRangeEnd;
-
-          // Range hover preview
-          const effectiveEnd = mode === 'range' && selectedRange[0] && !selectedRange[1] && hoverDate
-            ? hoverDate
-            : selectedRange[1];
-          const inRangeHighlight = mode === 'range' && isInRange(cell, selectedRange[0], effectiveEnd);
-          const isHoverEndpoint = mode === 'range' && selectedRange[0] && !selectedRange[1] && hoverDate && isSameDay(cell, hoverDate);
-
-          const isFullySelected = isSelectedSingle || isMultiSelected || isRangeEndpt;
-          const isFocused = focusedDate != null && isSameDay(cell, focusedDate);
-
-          let bg = 'transparent';
-          let textColor = isCurrentMonth
-            ? isWeekend ? `${theme.css.text}cc` : theme.css.text
-            : `${theme.css.textMuted}60`;
-          let borderStyle = 'none';
-          let fontWeight = 400;
-
-          if (isFullySelected || isHoverEndpoint) {
-            bg = theme.css.primary;
-            textColor = theme.css.bg;
-            fontWeight = 600;
-          } else if (inRangeHighlight) {
-            bg = `${theme.css.primary}18`;
-          }
-
-          if (isToday && !isFullySelected) {
-            borderStyle = `2px solid ${theme.css.primary}`;
-            fontWeight = 600;
-          }
-
-          if (disabled) {
-            textColor = `${theme.css.textMuted}50`;
-          }
-
-          if (isFocused && !isFullySelected) {
-            borderStyle = `2px solid ${theme.css.secondary}`;
-          }
-
-          const ariaLabel = cell.toLocaleDateString(locale, {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          });
-
-          // Roving tabindex: exactly one current-month cell (the roving date)
-          // sits in the Tab order; Arrow keys move real DOM focus between
-          // cells (WAI-ARIA APG date-picker grid keyboard model).
-          const isRoving = isCurrentMonth && isSameDay(cell, rovingDate);
-
-          return (
-            <button
-              key={idx}
-              type="button"
-              ref={isCurrentMonth ? (el) => registerDayRef(dayKey(cell), el) : undefined}
-              data-tkx-day=""
-              tabIndex={isRoving ? 0 : -1}
-              aria-label={ariaLabel}
-              aria-pressed={isFullySelected}
-              aria-disabled={disabled}
-              disabled={disabled}
-              onClick={() => !disabled && onSelectDate(cell)}
-              onMouseEnter={() => onHoverDate(cell)}
-              onMouseLeave={() => onHoverDate(null)}
-              onFocus={() => onSetFocused(cell)}
+      <thead>
+        <tr role="row">
+          {Array.from({ length: 7 }, (_, i) => (weekStartsOn + i) % 7).map((dow) => (
+            <th
+              key={dow}
+              role="columnheader"
+              scope="col"
+              abbr={weekdayLongLabels[dow]}
               style={{
+                textAlign: 'center',
+                fontSize: '11px',
+                fontWeight: 600,
+                color: theme.css.textMuted,
+                padding: '4px 0',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
                 width: '34px',
-                height: '34px',
-                borderRadius: '8px',
-                backgroundColor: bg,
-                color: textColor,
-                border: borderStyle,
-                fontSize: '13px',
-                fontWeight,
-                cursor: disabled ? 'not-allowed' : 'pointer',
-                opacity: disabled ? 0.35 : 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: 'inherit',
-                position: 'relative',
-                outline: 'none',
-                textDecoration: disabled ? 'line-through' : 'none',
-                transition: 'background-color 80ms ease',
               }}
             >
-              {cell.getDate()}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+              {weekdayLabels[dow]}
+            </th>
+          ))}
+        </tr>
+      </thead>
+
+      {/* Day grid */}
+      <tbody>
+        {weeks.map((week, wi) => (
+          <tr key={wi} role="row">
+            {week.map((cell, ci) => {
+              const isCurrentMonth = cell.getMonth() === month;
+              const isToday = isSameDay(cell, today);
+              const isWeekend = cell.getDay() === 0 || cell.getDay() === 6;
+              const disabled = isDateDisabled(cell);
+
+              const isSelectedSingle = mode === 'single' && selectedDate != null && isSameDay(cell, selectedDate);
+              const isMultiSelected = mode === 'multiple' && multiDates.some((d) => isSameDay(d, cell));
+              const isRangeStart = mode === 'range' && isRangeEndpoint(cell, selectedRange[0], null);
+              const isRangeEnd = mode === 'range' && isRangeEndpoint(cell, null, selectedRange[1]);
+              const isRangeEndpt = isRangeStart || isRangeEnd;
+
+              // Range hover preview
+              const effectiveEnd = mode === 'range' && selectedRange[0] && !selectedRange[1] && hoverDate
+                ? hoverDate
+                : selectedRange[1];
+              const inRangeHighlight = mode === 'range' && isInRange(cell, selectedRange[0], effectiveEnd);
+              const isHoverEndpoint = mode === 'range' && selectedRange[0] && !selectedRange[1] && hoverDate && isSameDay(cell, hoverDate);
+
+              const isFullySelected = isSelectedSingle || isMultiSelected || isRangeEndpt;
+              const isFocused = focusedDate != null && isSameDay(cell, focusedDate);
+
+              let bg = 'transparent';
+              let textColor = isCurrentMonth
+                ? isWeekend ? `${theme.css.text}cc` : theme.css.text
+                : `${theme.css.textMuted}60`;
+              let borderStyle = 'none';
+              let fontWeight = 400;
+
+              if (isFullySelected || isHoverEndpoint) {
+                bg = theme.css.primary;
+                textColor = theme.css.bg;
+                fontWeight = 600;
+              } else if (inRangeHighlight) {
+                bg = `${theme.css.primary}18`;
+              }
+
+              if (isToday && !isFullySelected) {
+                borderStyle = `2px solid ${theme.css.primary}`;
+                fontWeight = 600;
+              }
+
+              if (disabled) {
+                textColor = `${theme.css.textMuted}50`;
+              }
+
+              if (isFocused && !isFullySelected) {
+                borderStyle = `2px solid ${theme.css.secondary}`;
+              }
+
+              const ariaLabel = cell.toLocaleDateString(locale, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              });
+
+              // Roving tabindex: exactly one current-month cell (the roving date)
+              // sits in the Tab order; Arrow keys move real DOM focus between
+              // cells (WAI-ARIA APG date-picker grid keyboard model).
+              const isRoving = isCurrentMonth && isSameDay(cell, rovingDate);
+
+              return (
+                <td
+                  key={ci}
+                  role="gridcell"
+                  aria-selected={isFullySelected}
+                  aria-current={isToday ? 'date' : undefined}
+                  style={{ padding: 0 }}
+                >
+                  <button
+                    type="button"
+                    ref={isCurrentMonth ? (el) => registerDayRef(dayKey(cell), el) : undefined}
+                    data-tkx-day=""
+                    tabIndex={isRoving ? 0 : -1}
+                    aria-label={ariaLabel}
+                    aria-disabled={disabled}
+                    disabled={disabled}
+                    onClick={() => !disabled && onSelectDate(cell)}
+                    onMouseEnter={() => onHoverDate(cell)}
+                    onMouseLeave={() => onHoverDate(null)}
+                    onFocus={() => onSetFocused(cell)}
+                    style={{
+                      width: '34px',
+                      height: '34px',
+                      borderRadius: '8px',
+                      backgroundColor: bg,
+                      color: textColor,
+                      border: borderStyle,
+                      fontSize: '13px',
+                      fontWeight,
+                      cursor: disabled ? 'not-allowed' : 'pointer',
+                      opacity: disabled ? 0.35 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontFamily: 'inherit',
+                      position: 'relative',
+                      outline: 'none',
+                      textDecoration: disabled ? 'line-through' : 'none',
+                      transition: 'background-color 80ms ease',
+                    }}
+                  >
+                    {cell.getDate()}
+                  </button>
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
@@ -730,9 +766,10 @@ export const TkxDatePicker = forwardRef<HTMLInputElement, TkxDatePickerProps>(fu
 
   // ── Localized calendar labels (computed once per locale) ────────────────────
 
-  const { weekdayLabels, monthNames, monthAbbr } = useMemo(
+  const { weekdayLabels, weekdayLongLabels, monthNames, monthAbbr } = useMemo(
     () => ({
       weekdayLabels: getWeekdayShortLabels(locale),
+      weekdayLongLabels: getWeekdayLongLabels(locale),
       monthNames: getMonthNames(locale, 'long'),
       monthAbbr: getMonthNames(locale, 'short'),
     }),
@@ -827,10 +864,6 @@ export const TkxDatePicker = forwardRef<HTMLInputElement, TkxDatePickerProps>(fu
     },
     [forwardedRef],
   );
-  // Set briefly when Escape closes the picker, so the programmatic
-  // input.focus() that follows doesn't immediately re-open via onFocus.
-  // Cleared on the next user-initiated click.
-  const suppressNextFocusOpen = useRef(false);
 
   // ── A11y: dialog id + calendar grid focus management ─────────────────────
   //
@@ -838,6 +871,9 @@ export const TkxDatePicker = forwardRef<HTMLInputElement, TkxDatePickerProps>(fu
   // grid follows the APG roving-tabindex model: exactly one day cell is in
   // the Tab order, Arrow keys move real DOM focus between cells.
   const dialogId = `${id}-dialog`;
+  // Visible month/year headings that name the calendar grid(s) via aria-labelledby.
+  const headingId = `${dialogId}-heading`;
+  const headingId2 = `${dialogId}-heading-2`;
   const dayRefs = useRef(new Map<string, HTMLButtonElement>());
   const registerDayRef = useCallback((key: string, el: HTMLButtonElement | null) => {
     if (el) dayRefs.current.set(key, el);
@@ -912,8 +948,6 @@ export const TkxDatePicker = forwardRef<HTMLInputElement, TkxDatePickerProps>(fu
     const handler = (e: globalThis.KeyboardEvent) => {
       if (e.key === 'Escape') {
         setOpen(false);
-        // Guard against onFocus reopening the picker on the focus restoration.
-        suppressNextFocusOpen.current = true;
         inputRef.current?.focus();
       }
     };
@@ -1080,7 +1114,20 @@ export const TkxDatePicker = forwardRef<HTMLInputElement, TkxDatePickerProps>(fu
     else if (e.key === 'ArrowLeft') next = new Date(base.getFullYear(), base.getMonth(), base.getDate() - 1);
     else if (e.key === 'ArrowDown') next = new Date(base.getFullYear(), base.getMonth(), base.getDate() + 7);
     else if (e.key === 'ArrowUp') next = new Date(base.getFullYear(), base.getMonth(), base.getDate() - 7);
-    else if ((e.key === 'Enter' || e.key === ' ') && focusedDate) {
+    else if (e.key === 'Home' || e.key === 'End') {
+      // First / last day of the current week (respecting weekStartsOn).
+      const offset = (base.getDay() - weekStartsOn + 7) % 7;
+      next = new Date(base.getFullYear(), base.getMonth(), base.getDate() + (e.key === 'Home' ? -offset : 6 - offset));
+    } else if (e.key === 'PageUp' || e.key === 'PageDown') {
+      // Same day in the previous/next month (Shift: previous/next year),
+      // clamped to the length of the target month.
+      const dir = e.key === 'PageUp' ? -1 : 1;
+      const ty = base.getFullYear() + (e.shiftKey ? dir : 0);
+      const tm = base.getMonth() + (e.shiftKey ? 0 : dir);
+      const norm = new Date(ty, tm, 1);
+      const day = Math.min(base.getDate(), getDaysInMonth(norm.getFullYear(), norm.getMonth()));
+      next = new Date(norm.getFullYear(), norm.getMonth(), day);
+    } else if ((e.key === 'Enter' || e.key === ' ') && focusedDate) {
       // preventDefault so the focused day <button>'s native Enter/Space click
       // doesn't fire selectDate a second time (range/multiple would toggle).
       e.preventDefault();
@@ -1332,6 +1379,7 @@ export const TkxDatePicker = forwardRef<HTMLInputElement, TkxDatePickerProps>(fu
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             {calView === 'day' && (
               <>
+                <span id={headingId} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                 <button
                   type="button"
                   onClick={() => setCalView('month')}
@@ -1366,10 +1414,11 @@ export const TkxDatePicker = forwardRef<HTMLInputElement, TkxDatePickerProps>(fu
                 >
                   {viewYear}
                 </button>
+                </span>
                 {dualView && (
                   <>
                     <span style={{ color: theme.css.textMuted, fontSize: '14px' }}>–</span>
-                    <span style={{ fontSize: '14px', fontWeight: 600, color: theme.css.text }}>
+                    <span id={headingId2} style={{ fontSize: '14px', fontWeight: 600, color: theme.css.text }}>
                       {monthNames[month2]} {year2}
                     </span>
                   </>
@@ -1448,7 +1497,9 @@ export const TkxDatePicker = forwardRef<HTMLInputElement, TkxDatePickerProps>(fu
               theme={theme}
               locale={locale}
               weekdayLabels={weekdayLabels}
+              weekdayLongLabels={weekdayLongLabels}
               weekStartsOn={weekStartsOn}
+              labelId={headingId}
               rovingDate={rovingDate}
               registerDayRef={registerDayRef}
             />
@@ -1470,7 +1521,9 @@ export const TkxDatePicker = forwardRef<HTMLInputElement, TkxDatePickerProps>(fu
                 theme={theme}
                 locale={locale}
                 weekdayLabels={weekdayLabels}
+                weekdayLongLabels={weekdayLongLabels}
                 weekStartsOn={weekStartsOn}
+                labelId={headingId2}
                 rovingDate={rovingDate}
                 registerDayRef={registerDayRef}
               />
@@ -1747,6 +1800,9 @@ export const TkxDatePicker = forwardRef<HTMLInputElement, TkxDatePickerProps>(fu
           placeholder={safeHolder}
           disabled={isDisabled}
           aria-invalid={isInvalid}
+          // APG combobox + dialog pattern: the text input is the combobox
+          // that controls the calendar dialog.
+          role="combobox"
           aria-haspopup="dialog"
           aria-expanded={open}
           aria-controls={open ? dialogId : undefined}
@@ -1763,16 +1819,17 @@ export const TkxDatePicker = forwardRef<HTMLInputElement, TkxDatePickerProps>(fu
                 focusGridOnOpen.current = true;
                 setOpen(true);
               }
+            } else if (e.key === 'Enter' && !open) {
+              e.preventDefault();
+              focusGridOnOpen.current = true;
+              setOpen(true);
             }
           }}
-          onFocus={() => {
-            if (isDisabled) return;
-            if (suppressNextFocusOpen.current) {
-              // Programmatic focus from Escape-close — don't re-open.
-              suppressNextFocusOpen.current = false;
-              return;
-            }
-            setOpen(true);
+          // The calendar does not open on plain focus (tabbing through a form
+          // must not pop dialogs); it opens on click, ArrowDown, Enter or the
+          // calendar button.
+          onClick={() => {
+            if (!isDisabled && !open) setOpen(true);
           }}
           style={{
             flex: 1,

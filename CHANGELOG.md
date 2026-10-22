@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed — all 16 defects found by the real-browser matrix
+
+The first cross-browser run (below) surfaced 16 accessibility defects that
+jsdom could not show. All are fixed, every `test.fixme` is removed, and the
+62-test suite passes in Chromium, Firefox and WebKit with no exclusions
+beyond demo-authored markup.
+
+- **ThemeProvider (D6).** The `:root { --tkx-* }` style tag was inserted
+  *before* other stylesheets, so `global.css` dark defaults won for every
+  portalled surface. Light-theme Modal, Drawer, Popover, Menu and DatePicker
+  panels painted dark with invisible text. The tag is now the last child of
+  `<head>`, re-appended on theme change, and emitted as `:root:root` so a
+  later-injected `:root` sheet cannot outrank it. Regression test asserts a
+  portalled element's computed variable after a conflicting sheet is added.
+- **TkxPopover / TkxMenu (D7, D8).** Trigger wrappers were `role="button"`
+  around the caller's real button: nested-interactive and two Tab stops.
+  Handlers and ARIA now clone onto the child element; the wrapper is inert.
+- **TkxMenu (D9).** Enter, Space and ArrowDown open with the first enabled
+  item active and `aria-activedescendant` set; ArrowUp opens on the last.
+- **TkxButton (D1) / TkxBadge (D13).** Contrast maths was fed
+  `var(--tkx-…)` strings, parsed as black, so every scheme chose white text.
+  Foreground now resolves from the raw token (or a CSS relative-colour
+  expression for RSC-safe Badge). Warning buttons and default/warning badges
+  pass AA.
+- **TkxSelect (D2).** `aria-multiselectable` moved off the combobox trigger
+  onto the listbox; placeholder uses `textMuted` without opacity (5.3:1).
+- **TkxCheckbox (D3, API change).** `onChange` is now
+  `(checked: boolean, event) => void`, matching the documented contract. The
+  old event-first signature made `onChange={setChecked}` impossible to
+  uncheck. `aria-checked="mixed"` is set when indeterminate, as documented.
+- **TkxRadioGroup (D4, D5).** Groups generate a name with `useId` when none
+  is given, so Tab gives one stop per group and Firefox arrow keys work.
+  Hint text no longer sits under the disabled-state opacity.
+- **TkxBreadcrumb (D10, D11).** The overflow "…" control is a real list
+  item; expanding it moves focus to the first revealed crumb.
+- **TkxDataGrid (D12).** `role="grid"`/`treegrid` moved from the wrapper
+  `<div>` to the `<table>`; all row, level, expanded and controls wiring
+  intact (118 unit tests).
+- **TkxDatePicker (D14, D15).** Input is a `role="combobox"` with
+  `aria-haspopup="dialog"` and `aria-controls`; the calendar is a real
+  `role="grid"` with rows, column headers and `aria-selected` gridcells;
+  Home/End and PageUp/PageDown added; the picker no longer opens on focus.
+- **TkxSlider (D16).** `aria-valuenow`, fill and thumb are clamped to
+  `[min, max]`; the demo no longer passes an out-of-range value.
+
 ### Added — real-browser accessibility matrix (Chromium, Firefox, WebKit)
 
 `npm run test:browser` runs 62 Playwright tests per browser against the demo:

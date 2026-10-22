@@ -42,10 +42,11 @@ const [checked, setChecked] = useState(true);
 | Prop | Type | Required | Description |
 |---|---|---|---|
 | `label` | `ReactNode` |  |  |
+| `onChange` | `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void` |  | New checked state first, native event second — `onChange={setChecked}` works for controlled usage. |
 | `hint` | `string` |  |  |
 | `isInvalid` | `boolean` |  |  |
 | `errorMessage` | `string` |  |  |
-| `isIndeterminate` | `boolean` |  |  |
+| `isIndeterminate` | `boolean` |  | Mixed state: sets `input.indeterminate` and `aria-checked="mixed"`. |
 | `size` | `CheckboxSize` |  |  |
 | `colorScheme` | `'primary' \| 'success' \| 'danger' \| 'warning'` |  |  |
 

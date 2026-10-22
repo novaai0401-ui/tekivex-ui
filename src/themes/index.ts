@@ -488,16 +488,23 @@ export function ThemeProvider({
     if (!styleEl) {
       styleEl = document.createElement('style');
       styleEl.id = 'tkx-theme';
-      // Insert as the very first style element so it has the lowest specificity
-      // and component-level overrides always win.
-      const firstStyle = document.head.querySelector('style');
-      if (firstStyle) {
-        document.head.insertBefore(styleEl, firstStyle);
-      } else {
-        document.head.appendChild(styleEl);
-      }
     }
-    styleEl.textContent = `:root { ${vars} }`;
+    // The provider's `:root` block must beat the Quantum-Dark `:root` defaults
+    // in global.css (and any other `:root { --tkx-* }` sheet a bundler or a
+    // later `<style>` injection adds) for everything rendered OUTSIDE the
+    // provider's wrapper <div> — i.e. every createPortal'd overlay in <body>,
+    // which cannot inherit the wrapper's inline vars. Two measures:
+    //  1. keep this <style> as the LAST child of <head> (re-appended on every
+    //     theme change) so it wins on source order;
+    //  2. emit the block as `:root:root` (specificity 0,2,0) so it also wins
+    //     against a plain `:root` sheet inserted after mount.
+    // Element-level overrides (inline vars, class rules on descendants) are
+    // unaffected: custom properties set on a nearer ancestor always win over
+    // inherited root values regardless of selector specificity.
+    if (styleEl !== document.head.lastElementChild) {
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = `:root:root { ${vars} }`;
     // Also expose the active scheme on <html> for consumers who want to
     // hook off it via [data-tkx-scheme] selectors.
     document.documentElement.setAttribute(

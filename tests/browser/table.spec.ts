@@ -8,11 +8,8 @@ test.describe('Table', () => {
 
   test('axe: no serious/critical WCAG 2.1 AA violations', async ({ page }) => {
     await expectNoSeriousViolations(page, {
+      // Status-cell <TkxBadge>s are scanned too (D13 fixed).
       exclude: [
-        // Not the component under test: status cells render <TkxBadge> whose
-        // default/warning variants fail contrast — tracked as a TkxBadge defect
-        // in docs/BROWSER-MATRIX.md.
-        '[aria-label^="Live demo"] td > span',
         // Demo-authored: the "Sticky Header" example wraps the table in its own
         // <div style="max-height:220px; overflow-y:auto"> (demo/docs/TablePage.tsx:302)
         // which trips scrollable-region-focusable; TkxTable's own maxHeight prop

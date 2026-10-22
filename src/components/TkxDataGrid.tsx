@@ -1650,7 +1650,7 @@ export function TkxDataGrid<T = any>({
   // The container keeps a focus-forwarding FALLBACK (tabIndex=-1, so it is
   // NOT a Tab stop) for programmatic grid.focus() calls. Editors, carets,
   // checkboxes and filter inputs are never hijacked.
-  const gridRootRef = useRef<HTMLDivElement>(null);
+  const gridRootRef = useRef<HTMLTableElement>(null);
   const lastFocusedCellRef = useRef<HTMLTableCellElement | null>(null);
   // Last-focused cell coordinates in ABSOLUTE row space (index into the
   // full logical row list — virtualSource when virtual — not just the
@@ -1839,7 +1839,7 @@ export function TkxDataGrid<T = any>({
   });
 
   const handleGridFocus = useCallback(
-    (e: React.FocusEvent<HTMLDivElement>) => {
+    (e: React.FocusEvent<HTMLTableElement>) => {
       // Only forward when the container ITSELF receives focus (Tab into the
       // grid) — not when focus lands on inner controls (React onFocus bubbles).
       if (e.target !== gridRootRef.current) return;
@@ -1855,7 +1855,7 @@ export function TkxDataGrid<T = any>({
   );
 
   const handleGridKeyDown = useCallback(
-    (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    (e: ReactKeyboardEvent<HTMLTableElement>) => {
       const target = e.target as HTMLElement;
       // Only act when focus is on a grid cell itself — not on editors,
       // carets, checkboxes, filter inputs or other interactive descendants.
@@ -2005,19 +2005,6 @@ export function TkxDataGrid<T = any>({
 
   return (
     <div
-      ref={gridRootRef}
-      role={isTreeMode ? 'treegrid' : 'grid'}
-      aria-label={t.dataGrid ?? 'Data grid'}
-      aria-rowcount={totalRows}
-      aria-colcount={totalCols}
-      id={gridId}
-      // The grid's single Tab stop is the roving-tabindex cell, not the
-      // container. tabIndex=-1 keeps a programmatic grid.focus() fallback
-      // that forwards into the last-focused (or first) cell without adding
-      // a second Tab stop.
-      tabIndex={-1}
-      onFocus={handleGridFocus}
-      onKeyDown={handleGridKeyDown}
       className={tkx('font-sans rounded-lg overflow-hidden')}
       style={{ border: `1px solid ${theme.css.border}`, backgroundColor: theme.css.bg }}
     >
@@ -2048,6 +2035,23 @@ export function TkxDataGrid<T = any>({
         }}
       >
         <table
+          ref={gridRootRef}
+          // The grid/treegrid role lives on the <table> itself so its
+          // native <thead>/<tbody>/<tr>/<th>/<td> descendants map onto the
+          // required rowgroup/row/columnheader/gridcell children (a <table>
+          // is not a permitted child of a role="grid" wrapper).
+          role={isTreeMode ? 'treegrid' : 'grid'}
+          aria-label={t.dataGrid ?? 'Data grid'}
+          aria-rowcount={totalRows}
+          aria-colcount={totalCols}
+          id={gridId}
+          // The grid's single Tab stop is the roving-tabindex cell, not the
+          // table. tabIndex=-1 keeps a programmatic grid.focus() fallback
+          // that forwards into the last-focused (or first) cell without
+          // adding a second Tab stop.
+          tabIndex={-1}
+          onFocus={handleGridFocus}
+          onKeyDown={handleGridKeyDown}
           className={tkx('w-full')}
           style={{ borderCollapse: 'separate', borderSpacing: 0, tableLayout: 'auto' }}
         >

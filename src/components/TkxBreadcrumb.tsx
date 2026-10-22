@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
   type CSSProperties,
@@ -124,6 +125,21 @@ export function TkxBreadcrumb({
     setExpanded(false);
   }, [items]);
 
+  // After "…" is activated the button is removed from the DOM; move focus to
+  // the first newly revealed item so keyboard focus is not dropped to <body>
+  // (WCAG 2.4.3). `pendingFocusIndex` is the original index of that item.
+  const listRef = useRef<HTMLOListElement>(null);
+  const pendingFocusIndex = useRef<number | null>(null);
+  useEffect(() => {
+    if (!expanded || pendingFocusIndex.current === null) return;
+    const idx = pendingFocusIndex.current;
+    pendingFocusIndex.current = null;
+    const target = listRef.current?.querySelector<HTMLElement>(
+      `[data-tkx-breadcrumb-index="${idx}"] a, [data-tkx-breadcrumb-index="${idx}"] button`,
+    );
+    target?.focus();
+  }, [expanded]);
+
   // Collapse logic: show first, last, and ellipsis when items exceed maxItems
   const shouldCollapse =
     !expanded && maxItems !== undefined && maxItems > 1 && items.length > maxItems;
@@ -189,7 +205,7 @@ export function TkxBreadcrumb({
 
     if (isLast) {
       return (
-        <li key={`item-${originalIndex}`}>
+        <li key={`item-${originalIndex}`} data-tkx-breadcrumb-index={originalIndex}>
           <span
             aria-current="page"
             className={tkx('inline-flex items-center gap-1.5 text-sm font-medium')}
@@ -236,7 +252,7 @@ export function TkxBreadcrumb({
 
     if (isLink) {
       return (
-        <li key={`item-${originalIndex}`}>
+        <li key={`item-${originalIndex}`} data-tkx-breadcrumb-index={originalIndex}>
           <a
             href={item.href}
             onClick={(e) => {
@@ -262,7 +278,7 @@ export function TkxBreadcrumb({
     }
 
     return (
-      <li key={`item-${originalIndex}`}>
+      <li key={`item-${originalIndex}`} data-tkx-breadcrumb-index={originalIndex}>
         <button
           type="button"
           onClick={() => handleClick(item, originalIndex)}
@@ -295,10 +311,12 @@ export function TkxBreadcrumb({
         rendered.push(renderSeparator(`sep-ellipsis-before`));
       }
       rendered.push(
-        <li key="ellipsis" role="presentation">
+        <li key="ellipsis">
           <EllipsisButton
             onClick={() => {
-              // Reveal the hidden middle items in place.
+              // Reveal the hidden middle items in place and move focus to the
+              // first revealed item once it is rendered.
+              pendingFocusIndex.current = headCount;
               setExpanded(true);
             }}
             bgColor={theme.css.surfaceAlt}
@@ -327,6 +345,7 @@ export function TkxBreadcrumb({
       }}
     >
       <ol
+        ref={listRef}
         role="list"
         className={tkx('flex items-center flex-wrap list-none m-0 p-0')}
       >

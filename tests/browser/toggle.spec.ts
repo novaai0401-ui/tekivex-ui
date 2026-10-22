@@ -7,13 +7,8 @@ test.describe('Toggle', () => {
   test.beforeEach(async ({ page }) => gotoComponent(page, 'toggle'));
 
   test('axe: no serious/critical WCAG 2.1 AA violations', async ({ page }) => {
-    await expectNoSeriousViolations(page, {
-      // Not the component under test: the demo places a <TkxBadge variant="default">
-      // next to the first toggle. TkxBadge default/warning variants fail contrast
-      // (white on var(--tkx-border)) — tracked as a separate TkxBadge defect in
-      // docs/BROWSER-MATRIX.md.
-      exclude: ['[aria-label="Live demo: Basic Toggle"] > span'],
-    });
+    // The <TkxBadge> next to the first toggle is scanned too (D13 fixed).
+    await expectNoSeriousViolations(page);
   });
 
   test('keyboard: Tab reaches switch; Space and Enter toggle aria-checked', async ({ page }) => {

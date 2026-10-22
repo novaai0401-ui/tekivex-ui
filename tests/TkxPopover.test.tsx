@@ -78,4 +78,33 @@ describe('TkxPopover', () => {
     expect(wrapper.getAttribute('role')).toBeNull();
     expect(wrapper.getAttribute('tabindex')).toBeNull();
   });
+
+  // ── D7: the trigger element itself carries the control ARIA + handlers ───
+
+  it('clones aria-expanded/aria-haspopup/aria-controls onto the trigger element (D7)', () => {
+    render(
+      <TkxPopover trigger={<button>Open</button>} content={<p>Body</p>} />,
+      { wrapper: Wrapper },
+    );
+    const btn = screen.getByRole('button', { name: 'Open' });
+    expect(btn.getAttribute('aria-haspopup')).toBe('dialog');
+    expect(btn.getAttribute('aria-expanded')).toBe('false');
+    expect(btn.parentElement?.getAttribute('aria-haspopup')).toBeNull();
+    fireEvent.click(btn);
+    expect(btn.getAttribute('aria-expanded')).toBe('true');
+    expect(btn.getAttribute('aria-controls')).toBe(screen.getByRole('dialog').id);
+    // Only one focusable element for one control.
+    expect(document.querySelectorAll('[tabindex="0"], button').length).toBe(1);
+  });
+
+  it("still calls the trigger's own onClick (D7)", () => {
+    const onClick = vi.fn();
+    render(
+      <TkxPopover trigger={<button onClick={onClick}>Open</button>} content={<p>Body</p>} />,
+      { wrapper: Wrapper },
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Body')).toBeInTheDocument();
+  });
 });

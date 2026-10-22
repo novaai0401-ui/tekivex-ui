@@ -8,6 +8,17 @@ function Wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('TkxBadge', () => {
+  // D13: the foreground must not be hard white on a var() background; the
+  // component is context-free, so it hands the decision to CSS.
+  it('does not paint white text over the default/warning token backgrounds', () => {
+    for (const variant of ['default', 'warning'] as const) {
+      const { unmount } = render(<TkxBadge variant={variant}>{variant}</TkxBadge>, { wrapper: Wrapper });
+      const color = screen.getByText(variant).style.color;
+      expect(color).not.toMatch(/^(#fff(fff)?|rgb\(255, 255, 255\))$/i);
+      unmount();
+    }
+  });
+
   it('renders children text', () => {
     render(<TkxBadge>New</TkxBadge>, { wrapper: Wrapper });
     expect(screen.getByText('New')).toBeInTheDocument();

@@ -12,10 +12,9 @@ function wrap(ui: React.ReactElement) {
 }
 
 function getTrigger() {
-  // The component wraps the trigger in a span[role="button"]; the inner
-  // <button> also has role="button". Return the outer wrapper that owns
-  // the click handler and aria-expanded.
-  return screen.getByText('Open').closest('[role="button"]') as HTMLElement;
+  // D8: the caller's trigger element IS the control — handlers and ARIA are
+  // cloned onto it (no role=button wrapper around the <button> any more).
+  return screen.getByText('Open').closest('button, [role="button"]') as HTMLElement;
 }
 
 function getMenu() {
@@ -227,6 +226,71 @@ describe('TkxMenu', () => {
       wrap(<TkxMenu trigger={<button>Open</button>} items={items} />);
       fireEvent.keyDown(getTrigger(), { key: 'ArrowDown' });
       expect(getMenu()).not.toBeNull();
+    });
+
+    // ── D9: APG menu button — keyboard open sets the active item ──────────
+    const three: MenuItem[] = [
+      { id: 'a', label: 'A' },
+      { id: 'b', label: 'B' },
+      { id: 'c', label: 'C' },
+    ];
+
+    it.each(['Enter', ' ', 'ArrowDown'])('opening with %j makes the first item active (D9)', (key) => {
+      wrap(<TkxMenu trigger={<button>Open</button>} items={three} />);
+      fireEvent.keyDown(getTrigger(), { key });
+      const menu = getMenu()!;
+      const first = menu.querySelector('[role="menuitem"]') as HTMLElement;
+      expect(first.id).toBeTruthy();
+      expect(menu.getAttribute('aria-activedescendant')).toBe(first.id);
+      closeMenuIfOpen();
+    });
+
+    it('opening with ArrowUp makes the last item active (D9)', () => {
+      wrap(<TkxMenu trigger={<button>Open</button>} items={three} />);
+      fireEvent.keyDown(getTrigger(), { key: 'ArrowUp' });
+      const menu = getMenu()!;
+      const all = menu.querySelectorAll('[role="menuitem"]');
+      expect(menu.getAttribute('aria-activedescendant')).toBe(all[all.length - 1].id);
+      closeMenuIfOpen();
+    });
+
+    it('keyboard open skips a leading disabled item (D9)', () => {
+      const items: MenuItem[] = [{ id: 'x', label: 'X', disabled: true }, ...three];
+      wrap(<TkxMenu trigger={<button>Open</button>} items={items} />);
+      fireEvent.keyDown(getTrigger(), { key: 'Enter' });
+      const menu = getMenu()!;
+      expect(menu.getAttribute('aria-activedescendant')).toBe(
+        screen.getByText('A').closest('[role="menuitem"]')!.id,
+      );
+      closeMenuIfOpen();
+    });
+
+    it('pointer open leaves no item active', () => {
+      wrap(<TkxMenu trigger={<button>Open</button>} items={three} />);
+      fireEvent.click(getTrigger());
+      expect(getMenu()!.getAttribute('aria-activedescendant')).toBeNull();
+      closeMenuIfOpen();
+    });
+
+    // ── D8: no role=button wrapper around the trigger element ──────────────
+    it('does not wrap the trigger <button> in a role=button / tabindex wrapper (D8)', () => {
+      wrap(<TkxMenu trigger={<button>Open</button>} items={three} />);
+      const btn = getTrigger();
+      expect(btn.tagName).toBe('BUTTON');
+      expect(btn.getAttribute('aria-haspopup')).toBe('menu');
+      expect(btn.getAttribute('aria-expanded')).toBe('false');
+      expect(btn.closest('[role="button"]')).toBeNull();
+      expect(document.querySelectorAll('[tabindex="0"], button').length).toBe(1);
+    });
+
+    it('promotes a non-interactive trigger to a focusable button (D8)', () => {
+      wrap(<TkxMenu trigger={<span>Open</span>} items={three} />);
+      const span = screen.getByText('Open');
+      expect(span.getAttribute('role')).toBe('button');
+      expect(span.getAttribute('tabindex')).toBe('0');
+      fireEvent.keyDown(span, { key: 'Enter' });
+      expect(getMenu()).not.toBeNull();
+      closeMenuIfOpen();
     });
 
     it('typeahead jumps to matching item', () => {

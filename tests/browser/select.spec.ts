@@ -5,20 +5,13 @@ import { gotoComponent, expectNoSeriousViolations } from './helpers';
 // arrows move the active option (aria-activedescendant), Enter selects,
 // Escape closes and keeps focus on the combobox.
 
-// DEFECT (TkxSelect): two axe failures on every instance, all browsers.
-//  1. [critical] aria-allowed-attr — aria-multiselectable is set on the
-//     <button role="combobox"> trigger (src/components/TkxSelect.tsx, trigger
-//     props near line 1037). aria-multiselectable belongs on the listbox only.
-//  2. [serious] color-contrast — placeholder text is rendered with
-//     `opacity: 0.6` → #a6a3a0 on #fff = 2.5:1 (src/components/TkxSelect.tsx,
-//     placeholder <span>).
-const SELECT_AXE_DEFECT = 'TkxSelect: aria-multiselectable on role=combobox + placeholder contrast 2.5:1';
+// D2 (fixed): aria-multiselectable now lives on the listbox only, and the
+// placeholder is painted in textMuted with no extra opacity.
 
 test.describe('Select', () => {
   test.beforeEach(async ({ page }) => gotoComponent(page, 'select'));
 
   test('axe: no serious/critical WCAG 2.1 AA violations (closed)', async ({ page }) => {
-    test.fixme(true, SELECT_AXE_DEFECT);
     await expectNoSeriousViolations(page);
   });
 

@@ -25,14 +25,8 @@ test.describe('Checkbox', () => {
   });
 
   test('keyboard: Space on a checked checkbox unchecks it', async ({ page }) => {
-    // DEFECT (TkxCheckbox API contract): the demo and the props table
-    // (demo/docs/CheckboxPage.tsx:16) document `onChange: (checked: boolean) => void`
-    // and wire `onChange={setChecked}`, but TkxCheckbox forwards the native
-    // ChangeEvent (src/components/TkxCheckbox.tsx:137 `onChange={onChange}`), so
-    // state becomes the (truthy) event and the box can never be unchecked —
-    // by keyboard or mouse — in every browser. Either the component should emit
-    // the boolean or the docs/demo must use `e.target.checked`.
-    test.fixme(true, 'TkxCheckbox onChange emits the event, docs/demo expect a boolean — cannot uncheck');
+    // D3 (fixed): onChange now emits `(checked: boolean, event)`, so the demo's
+    // `onChange={setChecked}` controlled wiring can uncheck again.
     const box = page.getByRole('region', { name: 'Live demo: Basic Checkbox' }).locator('input[type="checkbox"]').first();
     await box.focus();
     await page.keyboard.press('Space');
@@ -49,8 +43,9 @@ test.describe('Checkbox', () => {
     await child.focus();
     await page.keyboard.press('Space');
     await expect(child).toBeChecked();
-    // Browsers expose input.indeterminate as "mixed" to AT. (The demo docs also
-    // claim aria-checked="mixed" is set; it is not — noted in BROWSER-MATRIX.md.)
+    // Browsers expose input.indeterminate as "mixed" to AT; the component also
+    // sets aria-checked="mixed" explicitly (D3).
     await expect.poll(() => parent.evaluate(el => (el as HTMLInputElement).indeterminate)).toBe(true);
+    await expect(parent).toHaveAttribute('aria-checked', 'mixed');
   });
 });
