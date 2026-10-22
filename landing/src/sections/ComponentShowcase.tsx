@@ -41,6 +41,10 @@ import {
   TkxTag,
   TkxDivider,
   TkxTabs,
+  TkxTabList,
+  TkxTab,
+  TkxTabPanels,
+  TkxTabPanel,
   TkxAccordion,
   TkxStepper,
   TkxPagination,
@@ -162,7 +166,7 @@ function InputDemo() {
   const [v, setV] = useState('');
   return (
     <div style={{ width: '100%', maxWidth: 240 }}>
-      <TkxInput value={v} onChange={setV} label="Email" placeholder="you@example.com" />
+      <TkxInput value={v} onChange={(e) => setV(e.target.value)} label="Email" placeholder="you@example.com" />
     </div>
   );
 }
@@ -170,7 +174,7 @@ function NumberDemo() {
   const [v, setV] = useState(7);
   return (
     <div style={{ width: '100%', maxWidth: 200 }}>
-      <TkxNumberInput value={v} onChange={setV} label="Quantity" min={0} max={99} />
+      <TkxNumberInput value={v} onChange={(n) => setV(n ?? 0)} label="Quantity" min={0} max={99} />
     </div>
   );
 }
@@ -178,7 +182,7 @@ function SelectDemo() {
   const [v, setV] = useState('in');
   return (
     <div style={{ width: '100%', maxWidth: 200 }}>
-      <TkxSelect value={v} onChange={setV} label="Country" options={[
+      <TkxSelect value={v} onChange={(val) => setV(Array.isArray(val) ? val[0] ?? '' : val)} label="Country" options={[
         { value: 'in', label: 'India' },
         { value: 'us', label: 'United States' },
         { value: 'uk', label: 'United Kingdom' },
@@ -195,12 +199,18 @@ function SliderDemo() {
   );
 }
 function TabsDemo() {
-  const [t, setT] = useState('a');
+  const [t, setT] = useState(0);
   return (
-    <TkxTabs value={t} onChange={setT} items={[
-      { id: 'a', label: 'Overview', panel: <span style={{ fontSize: 12 }}>Overview content</span> },
-      { id: 'b', label: 'Settings', panel: <span style={{ fontSize: 12 }}>Settings content</span> },
-    ]} />
+    <TkxTabs activeIndex={t} onChange={setT}>
+      <TkxTabList>
+        <TkxTab index={0}>Overview</TkxTab>
+        <TkxTab index={1}>Settings</TkxTab>
+      </TkxTabList>
+      <TkxTabPanels>
+        <TkxTabPanel index={0}><span style={{ fontSize: 12 }}>Overview content</span></TkxTabPanel>
+        <TkxTabPanel index={1}><span style={{ fontSize: 12 }}>Settings content</span></TkxTabPanel>
+      </TkxTabPanels>
+    </TkxTabs>
   );
 }
 function AccordionDemo() {
@@ -214,14 +224,14 @@ function AccordionDemo() {
 }
 function PaginationDemo() {
   const [p, setP] = useState(3);
-  return <TkxPagination current={p} total={10} onChange={setP} />;
+  return <TkxPagination page={p} total={100} pageSize={10} onChange={setP} size="sm" siblingCount={0} showEdges={false} />;
 }
 function StepperDemo() {
   return (
-    <TkxStepper current={1} steps={[
-      { title: 'Cart' },
-      { title: 'Shipping' },
-      { title: 'Pay' },
+    <TkxStepper activeStep={1} size="sm" steps={[
+      { id: 'cart', title: 'Cart' },
+      { id: 'shipping', title: 'Shipping' },
+      { id: 'pay', title: 'Pay' },
     ]} />
   );
 }
@@ -299,7 +309,7 @@ export function ComponentShowcase() {
         <Category title="Primitives" description="Single-purpose building blocks.">
           <ShowcaseCard name="TkxButton" slug="button" description="5 variants, 3 sizes, loading, icon slots, AAA focus ring.">
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
-              <TkxButton variant="primary">Primary</TkxButton>
+              <TkxButton variant="solid" colorScheme="primary">Primary</TkxButton>
               <TkxButton variant="outline">Outline</TkxButton>
             </div>
           </ShowcaseCard>
@@ -312,9 +322,9 @@ export function ComponentShowcase() {
           </ShowcaseCard>
           <ShowcaseCard name="TkxAvatar" slug="avatar" description="Image + initials fallback + presence dot. Group, stack, ring.">
             <div style={{ display: 'flex', gap: 8 }}>
-              <TkxAvatar name="Priya Kumar" />
-              <TkxAvatar name="Marcus Lee" />
-              <TkxAvatar name="Sara Chen" />
+              <TkxAvatar alt="Priya Kumar" initials="PK" />
+              <TkxAvatar alt="Marcus Lee" initials="ML" />
+              <TkxAvatar alt="Sara Chen" initials="SC" />
             </div>
           </ShowcaseCard>
           <ShowcaseCard name="TkxCard" slug="card" description="Composable card with header / body / footer slots.">
@@ -370,7 +380,7 @@ export function ComponentShowcase() {
           </ShowcaseCard>
           <ShowcaseCard name="TkxProgress" slug="progress" description="Determinate / indeterminate, with value label.">
             <div style={{ width: '100%', maxWidth: 240 }}>
-              <TkxProgress value={68} label="Uploading" showLabel />
+              <TkxProgress value={68} label="Uploading" showValue />
             </div>
           </ShowcaseCard>
           <ShowcaseCard name="TkxSpin" slug="spin" description="Loading spinner — 5 sizes, custom colour, screen-reader text.">
@@ -378,9 +388,9 @@ export function ComponentShowcase() {
           </ShowcaseCard>
           <ShowcaseCard name="TkxSkeleton" slug="skeleton" description="Loading placeholder — rect, circle, lines, custom shapes.">
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <TkxSkeleton variant="rect" width="100%" height={12} />
-              <TkxSkeleton variant="rect" width="80%" height={12} />
-              <TkxSkeleton variant="rect" width="60%" height={12} />
+              <TkxSkeleton variant="rectangular" width="100%" height={12} />
+              <TkxSkeleton variant="rectangular" width="80%" height={12} />
+              <TkxSkeleton variant="rectangular" width="60%" height={12} />
             </div>
           </ShowcaseCard>
           <ShowcaseCard name="TkxStatistic" slug="statistic" description="KPI tile with value, label, delta, trend arrow.">
@@ -405,7 +415,7 @@ export function ComponentShowcase() {
             <AccordionDemo />
           </ShowcaseCard>
           <ShowcaseCard name="TkxStepper" slug="stepper" description="Linear progress through a multi-step flow.">
-            <div style={{ width: '100%' }}>
+            <div style={{ width: '100%', padding: '0 28px', boxSizing: 'border-box' }}>
               <StepperDemo />
             </div>
           </ShowcaseCard>

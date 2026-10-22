@@ -270,7 +270,7 @@ export function ARProduct() {
                   <TkxOrbitControls preset="orbit" autoRotate />
                   <TkxXRSession
                     ar vr
-                    onSessionStart={(m) => setSessionMode(m as 'ar' | 'vr')}
+                    onSessionStart={(m: string) => setSessionMode(m as 'ar' | 'vr')}
                     onSessionEnd={() => setSessionMode(null)}
                   />
                 </TkxScene>

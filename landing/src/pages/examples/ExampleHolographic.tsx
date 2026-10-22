@@ -98,7 +98,6 @@ export function ExampleHolographic() {
             {TONES.map((t) => (
               <TkxHolographicButton
                 key={t}
-                tone={t}
                 onClick={() => setProgress((p) => Math.min(1, p + 0.05))}
               >
                 {t} +5%

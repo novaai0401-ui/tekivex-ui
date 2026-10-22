@@ -12,7 +12,7 @@
 // because the playground at /playground/ already covers them.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState, type ReactNode } from 'react';
+import { useState, type ReactNode, type ReactElement } from 'react';
 import {
   TkxFlowChart, type FlowChartData,
   TkxFormBuilder, type FormSchema,
@@ -525,10 +525,10 @@ function ButtonPreview() {
   return (
     <PreviewFrame height={160}>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-        <TkxButton variant="primary">Save</TkxButton>
-        <TkxButton variant="secondary">Cancel</TkxButton>
+        <TkxButton variant="solid" colorScheme="primary">Save</TkxButton>
+        <TkxButton variant="outline" colorScheme="secondary">Cancel</TkxButton>
         <TkxButton variant="ghost">Skip</TkxButton>
-        <TkxButton variant="danger">Delete</TkxButton>
+        <TkxButton variant="solid" colorScheme="danger">Delete</TkxButton>
       </div>
     </PreviewFrame>
   );
@@ -538,10 +538,10 @@ function BadgePreview() {
   return (
     <PreviewFrame height={140}>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-        <TkxBadge variant="solid">12</TkxBadge>
-        <TkxBadge variant="outline">draft</TkxBadge>
-        <TkxBadge variant="solid">v3.15</TkxBadge>
-        <TkxBadge variant="outline">beta</TkxBadge>
+        <TkxBadge variant="primary">12</TkxBadge>
+        <TkxBadge variant="default">draft</TkxBadge>
+        <TkxBadge variant="success">v3.15</TkxBadge>
+        <TkxBadge variant="info">beta</TkxBadge>
       </div>
     </PreviewFrame>
   );
@@ -554,7 +554,7 @@ function AlertPreview() {
         <TkxAlert variant="info"    title="New version available">A minor update is ready to install.</TkxAlert>
         <TkxAlert variant="success" title="Saved">Your changes have been committed.</TkxAlert>
         <TkxAlert variant="warning" title="Approaching quota">85% of your monthly API budget is used.</TkxAlert>
-        <TkxAlert variant="error"   title="Upload failed">The file exceeded the 10 MB limit.</TkxAlert>
+        <TkxAlert variant="danger"  title="Upload failed">The file exceeded the 10 MB limit.</TkxAlert>
       </div>
     </PreviewFrame>
   );
@@ -570,7 +570,7 @@ function CardPreview() {
             Three releases shipped, eight components added, zero security incidents.
           </p>
           <div style={{ display: 'flex', gap: 8 }}>
-            <TkxButton variant="primary">Read</TkxButton>
+            <TkxButton variant="solid" colorScheme="primary">Read</TkxButton>
             <TkxButton variant="ghost">Skip</TkxButton>
           </div>
         </div>
@@ -586,7 +586,7 @@ function AvatarPreview() {
         <TkxAvatar src="https://i.pravatar.cc/200?img=47" alt="Aria"  size="lg" status="online" />
         <TkxAvatar src="https://i.pravatar.cc/200?img=33" alt="Kenji" size="lg" status="busy" />
         <TkxAvatar src="https://i.pravatar.cc/200?img=15" alt="Idris" size="lg" status="offline" />
-        <TkxAvatar name="Pat O'Reilly" size="lg" />
+        <TkxAvatar alt="Pat O'Reilly" initials="PO" size="lg" />
       </div>
     </PreviewFrame>
   );
@@ -614,13 +614,13 @@ function TogglePreview() {
     <PreviewFrame height={180}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 320, margin: '0 auto' }}>
         <Row label="Email notifications">
-          <TkxToggle checked={a} onChange={setA} />
+          <TkxToggle checked={a} onChange={setA} label="Email notifications" />
         </Row>
         <Row label="Beta features">
-          <TkxToggle checked={b} onChange={setB} />
+          <TkxToggle checked={b} onChange={setB} label="Beta features" />
         </Row>
         <Row label="Two-factor auth">
-          <TkxToggle checked={c} onChange={setC} />
+          <TkxToggle checked={c} onChange={setC} label="Two-factor auth" />
         </Row>
       </div>
     </PreviewFrame>
@@ -641,8 +641,8 @@ function ProgressPreview() {
     <PreviewFrame height={200}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <TkxProgress value={32} label="Build artifacts" />
-        <TkxProgress value={78} label="Test coverage"  variant="success" />
-        <TkxProgress value={12} label="Storage used"   variant="warning" />
+        <TkxProgress value={78} label="Test coverage"  showValue />
+        <TkxProgress value={12} label="Storage used"   showValue />
       </div>
     </PreviewFrame>
   );
@@ -673,7 +673,7 @@ const kbdStyle: React.CSSProperties = {
 
 // ── Registry ────────────────────────────────────────────────────────────────
 
-export const PREVIEWS: Record<string, () => JSX.Element> = {
+export const PREVIEWS: Record<string, () => ReactElement> = {
   'flow-chart':           FlowChartPreview,
   'form-builder':         FormBuilderPreview,
   'mind-map':             MindMapPreview,

@@ -248,7 +248,6 @@ function CoverPicker({
         display: 'block', marginBottom: 24,
         height: 180, borderRadius: 12,
         border: '2px dashed #cbd5e1', background: '#f8fafc',
-        display_inner: 'grid' as never,
         cursor: 'pointer',
         position: 'relative',
       }}

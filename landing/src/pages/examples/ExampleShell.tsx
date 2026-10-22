@@ -8,6 +8,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { ThemeProvider, quantumDark } from 'tekivex-ui';
 
 export interface ExampleShellProps {
   title: string;
@@ -137,7 +138,10 @@ export function ExampleShell({
           </a>
         )}
       </div>
-      <div>{children}</div>
+      {/* The app-level provider is auroraLight (the landing is a light site).
+          Dark showcases re-theme their subtree so library components inside
+          them get dark-surface tokens instead of light text on light cards. */}
+      {dark ? <ThemeProvider theme={quantumDark}>{children}</ThemeProvider> : <div>{children}</div>}
     </div>
   );
 }

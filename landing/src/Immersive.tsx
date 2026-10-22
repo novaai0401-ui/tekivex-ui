@@ -24,6 +24,20 @@ import { withBase } from './base';
 const SKY_360 =
   'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Equirectangular_projection_SW.jpg/2560px-Equirectangular_projection_SW.jpg';
 
+// Shared styles for hotspot panels — declared before HOTSPOTS, which
+// references them at module-evaluation time.
+const linkStyle: React.CSSProperties = { color: '#00f5d4', fontWeight: 600 };
+const preStyle: React.CSSProperties = {
+  fontFamily: 'monospace',
+  fontSize: 12,
+  background: '#06060a',
+  padding: '10px 14px',
+  borderRadius: 8,
+  color: '#00f5d4',
+  margin: 0,
+  whiteSpace: 'pre',
+};
+
 // 8 hotspots arranged in a circle at user's eye level
 const HOTSPOTS: {
   id: string;
@@ -165,18 +179,6 @@ npm install tekivex-pdf`}
     },
   },
 ];
-
-const linkStyle: React.CSSProperties = { color: '#00f5d4', fontWeight: 600 };
-const preStyle: React.CSSProperties = {
-  fontFamily: 'monospace',
-  fontSize: 12,
-  background: '#06060a',
-  padding: '10px 14px',
-  borderRadius: 8,
-  color: '#00f5d4',
-  margin: 0,
-  whiteSpace: 'pre',
-};
 
 interface ImmersiveProps {
   open: boolean;
