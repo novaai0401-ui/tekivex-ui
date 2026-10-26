@@ -1,10 +1,10 @@
 {
-  "collectedAt": "2026-10-19T18:39:18.717Z",
-  "date": "2026-10-19",
+  "collectedAt": "2026-10-26T18:36:56.904Z",
+  "date": "2026-10-26",
   "npm": {
     "tekivex-ui": {
-      "weekly": 24,
-      "monthly": 716
+      "weekly": 359,
+      "monthly": 1783
     },
     "@tekivex/security-core": {
       "weekly": null,
@@ -15,8 +15,8 @@
       "monthly": null
     },
     "create-tekivex-app": {
-      "weekly": 7,
-      "monthly": 30
+      "weekly": 20,
+      "monthly": 59
     }
   },
   "github": {
